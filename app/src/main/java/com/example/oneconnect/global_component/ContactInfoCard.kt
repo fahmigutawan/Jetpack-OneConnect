@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
@@ -18,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
@@ -26,10 +28,12 @@ import com.example.oneconnect.model.domain.general.PhoneNumberDomain
 
 @Composable
 fun ContactInfoCard(
-    address: String,
+    location: String,
     name: String,
     phoneNumber: List<PhoneNumberDomain>
 ) {
+    val maxLocationWidth = LocalConfiguration.current.screenWidthDp / 3
+    val maxNameWidth = LocalConfiguration.current.screenWidthDp * 2 / 3
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
@@ -42,8 +46,18 @@ fun ContactInfoCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = name)
-                Text(text = address)
+                Text(
+                    modifier = Modifier.widthIn(max = maxNameWidth.dp),
+                    text = name,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    modifier = Modifier.widthIn(max = maxLocationWidth.dp),
+                    text = location,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
 
             phoneNumber.forEach { phoneNumber ->
