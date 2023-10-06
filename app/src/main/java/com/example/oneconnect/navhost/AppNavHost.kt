@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.oneconnect.MainViewModel
 import com.example.oneconnect.presentation.home.HomeScreen
+import com.example.oneconnect.presentation.map.MapScreen
 import com.example.oneconnect.presentation.splash.SplashScreen
 
 @Composable
@@ -29,7 +30,7 @@ fun AppNavHost(
         }
 
         composable(NavRoutes.MAP.name){
-
+            MapScreen()
         }
 
         composable(NavRoutes.PROFIL.name){
