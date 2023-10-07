@@ -1,5 +1,6 @@
 package com.example.oneconnect.presentation.map
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.oneconnect.data.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -9,4 +10,6 @@ import javax.inject.Inject
 class MapViewModel @Inject constructor(
     private val repository: Repository
 ) :ViewModel(){
+    val showRationaleDialog = mutableStateOf(false)
+    val showPermissionWarningDialog = mutableStateOf(false)
 }
