@@ -12,4 +12,8 @@ class MapViewModel @Inject constructor(
 ) :ViewModel(){
     val showRationaleDialog = mutableStateOf(false)
     val showPermissionWarningDialog = mutableStateOf(false)
+    val useDummyLocation = mutableStateOf<Boolean?>(null)
+
+    val userLong = mutableStateOf(112.63092731744476)
+    val userLat = mutableStateOf(-7.945945945945946)
 }
