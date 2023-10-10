@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
@@ -31,20 +32,21 @@ fun NonLazyVerticalGrid(
     columnCount: Int,
     eachItemAlignment: Alignment = Alignment.TopCenter,
     containerWidth:Dp? = null,
+    containerHorizontalPadding:Dp? = null,
     content: NonLazyGridScope.() -> Unit,
 ) {
     val scope = NonLazyGridScope()
     content(scope)
 
     val maxRow = ceil(scope.contents.size.toFloat() / columnCount.toFloat())
-    val maxColWidth = (containerWidth ?: (LocalConfiguration.current.screenWidthDp).dp)/columnCount
+    val maxColWidth = (containerWidth ?: (LocalConfiguration.current.screenWidthDp - ((containerHorizontalPadding?.value ?: 0f) * 2)).dp)/columnCount
 
     Column(
         modifier = modifier,
     ) {
         for (i in 0 until maxRow.toInt()) {
             Row(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = containerHorizontalPadding ?: 0.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 for (j in 0 until columnCount) {
