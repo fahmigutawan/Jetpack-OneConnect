@@ -24,6 +24,9 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -132,6 +135,25 @@ fun MapScreen(
             appDialogButtonOrientation = AppDialogButtonOrientation.VERTICAL
         )
     }
+
+    fusedLocationClient.requestLocationUpdates(
+        LocationRequest().apply {
+            interval = 2500
+            fastestInterval = 1500
+        },
+        object : LocationCallback() {
+            override fun onLocationResult(p0: LocationResult) {
+                super.onLocationResult(p0)
+                p0.lastLocation?.let {
+                    it.run {
+                        viewModel.userLong.value = longitude
+                        viewModel.userLat.value = latitude
+                    }
+                }
+            }
+        },
+        null
+    )
 
     LaunchedEffect(key1 = viewModel.useDummyLocation.value) {
         when (viewModel.useDummyLocation.value) {
