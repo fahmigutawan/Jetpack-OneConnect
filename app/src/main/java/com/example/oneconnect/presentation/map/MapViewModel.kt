@@ -14,6 +14,6 @@ class MapViewModel @Inject constructor(
     val showPermissionWarningDialog = mutableStateOf(false)
     val useDummyLocation = mutableStateOf<Boolean?>(null)
 
-    val userLong = mutableStateOf(112.63092731744476)
-    val userLat = mutableStateOf(-7.945945945945946)
+    val userLong = mutableStateOf(112.6150769)
+    val userLat = mutableStateOf(-7.9540899)
 }

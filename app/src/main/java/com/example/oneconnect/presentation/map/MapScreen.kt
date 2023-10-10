@@ -19,6 +19,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.oneconnect.R
 import com.example.oneconnect.databinding.MapboxViewBinding
 import com.example.oneconnect.global_component.AppDialog
 import com.example.oneconnect.global_component.AppDialogButtonOrientation
@@ -31,13 +32,23 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
+import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
+import com.mapbox.maps.plugin.LocationPuck2D
+import com.mapbox.maps.plugin.PuckBearingSource
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.CircleAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createCircleAnnotationManager
+import com.mapbox.maps.plugin.gestures.OnMoveListener
+import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorBearingChangedListener
+import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
+import com.mapbox.maps.plugin.locationcomponent.location
+import com.mapbox.maps.plugin.locationcomponent.location2
 
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -50,7 +61,7 @@ fun MapScreen(
     }
     val viewModel = hiltViewModel<MapViewModel>()
     val mapPermission = rememberPermissionState(
-        permission = android.Manifest.permission.ACCESS_COARSE_LOCATION
+        permission = Manifest.permission.ACCESS_COARSE_LOCATION
     )
     val context = LocalContext.current
     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
@@ -149,25 +160,6 @@ fun MapScreen(
         return
     }
 
-    fusedLocationClient.requestLocationUpdates(
-        LocationRequest().apply {
-            interval = 2500
-            fastestInterval = 1500
-        },
-        object : LocationCallback() {
-            override fun onLocationResult(p0: LocationResult) {
-                super.onLocationResult(p0)
-                p0.lastLocation?.let {
-                    it.run {
-                        viewModel.userLong.value = longitude
-                        viewModel.userLat.value = latitude
-                    }
-                }
-            }
-        },
-        null
-    )
-
     LaunchedEffect(key1 = viewModel.useDummyLocation.value) {
         when (viewModel.useDummyLocation.value) {
             true -> {
@@ -213,25 +205,22 @@ fun MapScreen(
         factory = {
             val binding = MapboxViewBinding.inflate(LayoutInflater.from(it))
 
+            binding.root.location.updateSettings {
+                this.enabled = true
+                this.locationPuck = LocationPuck2D(
+                    bearingImage = context.resources.getDrawable(
+                        R.drawable.ic_circle,
+                    ),
+                    scaleExpression = interpolate {
+                        linear()
+                    }.toJson()
+                )
+            }
+
             binding.root
         },
         update = {
             mapView.value = it
-
-            val annotationApi = it.annotations
-            val circleAnnotationManager = annotationApi.createCircleAnnotationManager()
-            val circleAnnotationOptions = CircleAnnotationOptions()
-                .withPoint(
-                    Point.fromLngLat(
-                        viewModel.userLong.value,
-                        viewModel.userLat.value
-                    )
-                )
-                .withCircleRadius(8.0)
-                .withCircleColor("#ee4e8b")
-                .withCircleStrokeWidth(2.0)
-                .withCircleStrokeColor("#ffffff")
-            circleAnnotationManager.create(circleAnnotationOptions)
         }
     )
 }
