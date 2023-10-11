@@ -4,5 +4,6 @@ enum class NavRoutes {
     SPLASH,
     BERANDA,
     MAP,
-    PROFIL
+    PROFIL,
+    LOGIN
 }

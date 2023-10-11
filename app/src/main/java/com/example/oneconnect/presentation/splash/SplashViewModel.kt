@@ -12,10 +12,10 @@ import javax.inject.Inject
 class SplashViewModel @Inject constructor(
     private val repository: Repository
 ) :ViewModel(){
-    fun precheck(onCheck:() -> Unit){
+    fun precheck(onCheck:(isLogin:Boolean) -> Unit){
         viewModelScope.launch {
             delay(2000)
-            onCheck()
+            onCheck(false) //SHOULD CHECK HERE
         }
     }
 }

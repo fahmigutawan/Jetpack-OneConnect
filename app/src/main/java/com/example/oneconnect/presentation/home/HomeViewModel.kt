@@ -1,5 +1,6 @@
 package com.example.oneconnect.presentation.home
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.oneconnect.data.Repository
 import com.example.oneconnect.model.domain.general.PhoneNumberDomain
@@ -11,5 +12,5 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val repository: Repository
 ) : ViewModel() {
-
+    val copiedNumber = mutableStateOf("")
 }

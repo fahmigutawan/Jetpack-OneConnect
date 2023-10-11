@@ -2,11 +2,15 @@ package com.example.oneconnect.presentation.profile.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,26 +22,25 @@ import coil.compose.AsyncImage
 import com.example.oneconnect.R
 
 @Composable
-fun ProfileTopSection(
-    modifier: Modifier,
-    name: String
+fun ProfileInformationCard(
+    phoneNumber: String,
+    nik: String
 ) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        AsyncImage(
-            modifier = Modifier
-                .size(108.dp)
-                .clip(CircleShape),
-            model = R.drawable.icon_dummy_pp,
-            contentDescription = ""
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(), elevation = CardDefaults.cardElevation(
+            defaultElevation = 8.dp
         )
-        Text(text = name)
-        Button(onClick = { /*TODO*/ }) {
-            Text(text = "Edit Profil")
-            Icon(imageVector = Icons.Default.Edit, contentDescription = "")
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = "Informasi Pribadi")
+            Column {
+                Text(text = "Nomor HP")
+                Text(text = phoneNumber)
+            }
+            Column {
+                Text(text = "NIK")
+                Text(text = nik)
+            }
         }
     }
 }

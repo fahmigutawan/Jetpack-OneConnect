@@ -1,5 +1,8 @@
 package com.example.oneconnect.presentation.home
 
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,24 +10,32 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.oneconnect.global_component.CategoryCard
 import com.example.oneconnect.global_component.CategoryCardType
 import com.example.oneconnect.global_component.ContactInfoCard
 import com.example.oneconnect.global_component.LastCallCard
 import com.example.oneconnect.global_component.NonLazyVerticalGrid
+import com.example.oneconnect.helper.SnackbarHandler
+import com.example.oneconnect.mainViewModel
 import com.example.oneconnect.model.domain.general.PhoneNumberDomain
 import com.example.oneconnect.model.domain.home.HomeCategoryDomain
 import com.example.oneconnect.model.domain.home.HomeFavoriteNumberDomain
 import com.example.oneconnect.model.domain.home.HomeLastCallDomain
 import com.example.oneconnect.model.domain.home.HomeUserDomain
 import com.example.oneconnect.presentation.home.component.HomeProfileSection
+import kotlin.system.exitProcess
 
 @Composable
 fun HomeScreen(
@@ -41,7 +52,7 @@ fun HomeScreen(
                     contactType = "wa"
                 ),
                 PhoneNumberDomain(
-                    phoneNumber = "0812345678",
+                    phoneNumber = "081234323313",
                     contactType = "reg"
                 )
             )
@@ -52,11 +63,11 @@ fun HomeScreen(
             location = "Nganjuk",
             numbers = listOf(
                 PhoneNumberDomain(
-                    phoneNumber = "0812345678",
+                    phoneNumber = "0841513413",
                     contactType = "wa"
                 ),
                 PhoneNumberDomain(
-                    phoneNumber = "0812345678",
+                    phoneNumber = "08645746",
                     contactType = "reg"
                 )
             )
@@ -67,11 +78,11 @@ fun HomeScreen(
             location = "Nganjuk",
             numbers = listOf(
                 PhoneNumberDomain(
-                    phoneNumber = "0812345678",
+                    phoneNumber = "0898978657",
                     contactType = "wa"
                 ),
                 PhoneNumberDomain(
-                    phoneNumber = "0812345678",
+                    phoneNumber = "08156353345",
                     contactType = "reg"
                 )
             )
@@ -106,15 +117,32 @@ fun HomeScreen(
         address = "Jl. Kalpataru"
     )
 
+    val viewModel = hiltViewModel<HomeViewModel>()
+    val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
+
+    BackHandler {
+        if (mainViewModel.backClicked.value) {
+            exitProcess(0)
+        } else {
+            SnackbarHandler.showSnackbar("Klik kembali sekali lagi untuk keluar dari OneConnect")
+            mainViewModel.backClicked.value = true
+        }
+    }
+
     LazyColumn(
         modifier = Modifier.padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            HomeProfileSection(modifier = Modifier.padding(top = 16.dp),name = dummyProfile.name, location = dummyProfile.address)
+            HomeProfileSection(
+                modifier = Modifier.padding(top = 16.dp),
+                name = dummyProfile.name,
+                location = dummyProfile.address
+            )
         }
         item {
-            Text(text = "Panggilan Terakhir")
+            Text(text = "Panggilan Terakhir", style = MaterialTheme.typography.headlineSmall)
         }
         item {
             LastCallCard(
@@ -124,7 +152,7 @@ fun HomeScreen(
             )
         }
         item {
-            Text(text = "Nomor Favorit")
+            Text(text = "Layanan Darurat", style = MaterialTheme.typography.headlineSmall)
         }
         item {
             val scrWidth = LocalConfiguration.current.screenWidthDp
@@ -149,13 +177,34 @@ fun HomeScreen(
             }
         }
         item {
-            Text(text = "Nomor Favorit")
+            Text(text = "Nomor Favorit", style = MaterialTheme.typography.headlineSmall)
         }
         items(dummyFavoriteNumber) { item ->
             ContactInfoCard(
                 location = item.location,
                 name = item.name,
-                phoneNumber = item.numbers
+                phoneNumber = item.numbers,
+                onCallClicked = { type, number ->
+                    when(type){
+                        "wa" -> {
+                            val numFix = "https://api.whatsapp.com/send?phone=${number.replaceFirstChar { "62" }}"
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(numFix))
+                            context.startActivity(intent)
+                        }
+
+                        else -> {
+                            val uri = Uri.parse("tel:$number")
+                            val intent = Intent(Intent.ACTION_DIAL, uri)
+                            context.startActivity(intent)
+                        }
+                    }
+                },
+                onCopyClicked = {
+                    clipboardManager.setText(AnnotatedString(it))
+                    viewModel.copiedNumber.value = it
+                    SnackbarHandler.showSnackbar("Nomor telah di-copy")
+                },
+                copiedNumber = viewModel.copiedNumber.value
             )
         }
     }

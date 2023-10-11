@@ -20,10 +20,18 @@ import com.example.oneconnect.navhost.NavRoutes
 fun SplashScreen(navController: NavController) {
     val viewmodel = hiltViewModel<SplashViewModel>()
 
-    viewmodel.precheck {
-        navController.navigate(NavRoutes.BERANDA.name) {
-            popUpTo(navController.graph.id) {
-                inclusive = true
+    viewmodel.precheck { isLogin ->
+        if(isLogin){
+            navController.navigate(NavRoutes.BERANDA.name) {
+                popUpTo(navController.graph.id) {
+                    inclusive = true
+                }
+            }
+        }else{
+            navController.navigate(NavRoutes.LOGIN.name) {
+                popUpTo(navController.graph.id) {
+                    inclusive = true
+                }
             }
         }
     }

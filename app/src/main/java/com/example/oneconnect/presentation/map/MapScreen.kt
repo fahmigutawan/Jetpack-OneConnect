@@ -8,6 +8,7 @@ import android.net.Uri
 import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,6 +45,8 @@ import com.example.oneconnect.global_component.AppDialogButtonOrientation
 import com.example.oneconnect.global_component.CategoryCard
 import com.example.oneconnect.global_component.CategoryCardType
 import com.example.oneconnect.global_component.NonLazyVerticalGrid
+import com.example.oneconnect.helper.SnackbarHandler
+import com.example.oneconnect.mainViewModel
 import com.example.oneconnect.model.domain.home.HomeCategoryDomain
 import com.example.oneconnect.ui.theme.seed
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -72,6 +75,7 @@ import com.mapbox.maps.plugin.locationcomponent.OnIndicatorBearingChangedListene
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
 import com.mapbox.maps.plugin.locationcomponent.location2
+import kotlin.system.exitProcess
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -221,18 +225,33 @@ fun MapScreen(
     LaunchedEffect(key1 = viewModel.useDummyLocation.value) {
         when (viewModel.useDummyLocation.value) {
             true -> {
-                mapView.value?.camera?.flyTo(
-                    CameraOptions
-                        .Builder()
-                        .center(
+                mapView.value?.let {
+                    it.camera.flyTo(
+                        CameraOptions
+                            .Builder()
+                            .center(
+                                Point.fromLngLat(
+                                    viewModel.userLong.value,
+                                    viewModel.userLat.value
+                                )
+                            )
+                            .zoom(15.0)
+                            .build()
+                    )
+
+                    val annotationApi = it.annotations
+                    val circleAnnotationManager = annotationApi.createCircleAnnotationManager()
+                    val circleAnnotationOptions = CircleAnnotationOptions()
+                        .withPoint(
                             Point.fromLngLat(
                                 viewModel.userLong.value,
                                 viewModel.userLat.value
                             )
                         )
-                        .zoom(15.0)
-                        .build()
-                )
+                        .withCircleRadius(8.0)
+                        .withCircleColor("#465DFF")
+                    circleAnnotationManager.create(circleAnnotationOptions)
+                }
             }
 
             false -> {
@@ -253,9 +272,33 @@ fun MapScreen(
                             .build()
                     )
                 }
+
+                mapView.value?.let {
+                    it.location.updateSettings {
+                        this.enabled = true
+                        this.locationPuck = LocationPuck2D(
+                            bearingImage = context.resources.getDrawable(
+                                R.drawable.ic_circle,
+                            ),
+                            scaleExpression = interpolate {
+                                linear()
+                            }.toJson()
+                        )
+                    }
+                    it.getMapboxMap().addOnMoveListener(onMoveListener)
+                }
             }
 
             null -> {}
+        }
+    }
+
+    BackHandler {
+        if(mainViewModel.backClicked.value){
+            exitProcess(0)
+        }else{
+            SnackbarHandler.showSnackbar("Klik kembali sekali lagi untuk keluar dari OneConnect")
+            mainViewModel.backClicked.value = true
         }
     }
 
@@ -287,20 +330,6 @@ fun MapScreen(
                 factory = {
                     val binding = MapboxViewBinding.inflate(LayoutInflater.from(it))
 
-                    binding.root.location.updateSettings {
-                        this.enabled = true
-                        this.locationPuck = LocationPuck2D(
-                            bearingImage = context.resources.getDrawable(
-                                R.drawable.ic_circle,
-                            ),
-                            scaleExpression = interpolate {
-                                linear()
-                            }.toJson()
-                        )
-                    }
-
-                    binding.root.getMapboxMap().addOnMoveListener(onMoveListener)
-
                     binding.root
                 },
                 update = {
@@ -329,7 +358,7 @@ fun MapScreen(
                         item {
                             Box(
                                 modifier = Modifier.padding(4.dp)
-                            ){
+                            ) {
                                 CategoryCard(
                                     onClick = { /*TODO*/ },
                                     type = CategoryCardType.SMALL,

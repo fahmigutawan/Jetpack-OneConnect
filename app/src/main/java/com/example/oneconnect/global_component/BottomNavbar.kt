@@ -77,7 +77,7 @@ fun BottomNavbar(
                                 tint = if (currentRoute == item.route) selectedColor else unselectedColor
                             )
                             Text(
-                                text = "Beranda",
+                                text = item.word,
                                 color = if (currentRoute == item.route) selectedColor else unselectedColor
                             )
                         }

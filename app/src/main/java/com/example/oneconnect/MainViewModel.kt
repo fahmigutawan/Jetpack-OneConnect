@@ -9,4 +9,5 @@ class MainViewModel:ViewModel() {
     val loading = mutableStateOf(false)
     val currentRoute = mutableStateOf(NavRoutes.SPLASH.name)
     val showBottomBar = mutableStateOf(false)
+    val backClicked = mutableStateOf(false)
 }

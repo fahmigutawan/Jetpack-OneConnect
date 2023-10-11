@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,21 +30,43 @@ fun LastCallCard(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             Column(
                 modifier = Modifier.widthIn(max = (scrWidth / 2).dp),
                 verticalArrangement = Arrangement.Center
             ) {
-                Text(text = name, overflow = TextOverflow.Ellipsis, maxLines = 1)
-                Text(text = location, overflow = TextOverflow.Ellipsis, maxLines = 1)
+                Text(
+                    text = name,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = location,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
             Column(
                 modifier = Modifier.widthIn(max = (scrWidth / 2).dp),
                 horizontalAlignment = Alignment.End
             ) {
-                Text(text = status, overflow = TextOverflow.Ellipsis, maxLines = 1)
+                Text(
+                    text = status,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
                 Button(onClick = { /*TODO*/ }) {
-                    Text(text = "Lihat Detail")
+                    Text(text = "Lihat Detail", color = MaterialTheme.colorScheme.onPrimary)
                 }
             }
         }

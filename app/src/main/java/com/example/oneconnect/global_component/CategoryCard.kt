@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,9 +27,9 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun CategoryCard(
     modifier: Modifier = Modifier,
-    onClick:() -> Unit,
+    onClick: () -> Unit,
     type: CategoryCardType,
-    word:String
+    word: String
 ) {
     Card(
         modifier = modifier,
@@ -44,11 +45,13 @@ fun CategoryCard(
                         .height(72.dp),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Box(modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(Color.Gray))
-                    Text(text = word)
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(Color.Gray)
+                    )
+                    Text(text = word, style = MaterialTheme.typography.titleLarge)
                 }
             }
 
@@ -60,11 +63,13 @@ fun CategoryCard(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Box(modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(Color.Gray))
-                    Text(text = word)
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(Color.Gray)
+                    )
+                    Text(text = word, style = MaterialTheme.typography.titleMedium)
                 }
             }
         }

@@ -1,15 +1,18 @@
 package com.example.oneconnect
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,12 +21,14 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -41,6 +46,7 @@ import com.example.oneconnect.navhost.NavRoutes
 import com.example.oneconnect.ui.theme.OneConnectTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 lateinit var mainViewModel: MainViewModel
@@ -53,6 +59,7 @@ lateinit var _showSnackbarWithAction: (
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,55 +109,85 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
+            LaunchedEffect(key1 = mainViewModel.backClicked.value) {
+                delay(2000)
+                mainViewModel.backClicked.value = false
+            }
+
             OneConnectTheme {
                 Scaffold(
                     snackbarHost = {
-                        SnackbarHost(hostState = snackbarHostState)
-                    },
-                    bottomBar = {
-                        if (mainViewModel.showBottomBar.value) {
-                            BottomNavbar(
-                                onItemClicked = {
-                                    navController.navigate(it)
-                                },
-                                currentRoute = mainViewModel.currentRoute.value,
-                                selectedColor = selectedNavbarItemColor,
-                                unselectedColor = unselectedNavbarItemColor
-                            )
-                        }
-                    },
-                    floatingActionButton = {
-                        if (mainViewModel.showBottomBar.value) {
-                            Column(
-                                modifier = Modifier.offset(y = 64.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                FloatingActionButton(
-                                    shape = CircleShape,
-                                    onClick = {
-                                        navController.navigate(NavRoutes.MAP.name)
-                                    }) {
-                                    Icon(
-                                        imageVector = Icons.Default.LocationOn,
-                                        contentDescription = "",
-                                        tint = if (mainViewModel.currentRoute.value == NavRoutes.MAP.name) selectedNavbarItemColor else unselectedNavbarItemColor
-                                    )
+                        SnackbarHost(
+                            hostState = snackbarHostState,
+                            snackbar = {
+                                Snackbar(
+                                    modifier = Modifier.padding(32.dp),
+                                    shape = RoundedCornerShape(16.dp),
+                                    action = {
+                                        it.visuals.actionLabel?.let { it1 ->
+                                            Text(
+                                                modifier = Modifier.clickable { it.performAction() },
+                                                text = it1,
+                                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                                            )
+                                        }
+                                    },
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                ) {
+                                    Text(text = it.visuals.message, color = Color.Black)
                                 }
-                                Text(
-                                    text = "Maps",
-                                    color = if (mainViewModel.currentRoute.value == NavRoutes.MAP.name) selectedNavbarItemColor else unselectedNavbarItemColor
+                            }
+                        )
+                    },
+                ) {
+                    Scaffold(
+                        bottomBar = {
+                            if (mainViewModel.showBottomBar.value) {
+                                BottomNavbar(
+                                    onItemClicked = {
+                                        if (navController.currentDestination?.route != it) {
+                                            navController.navigate(it)
+                                        }
+                                    },
+                                    currentRoute = mainViewModel.currentRoute.value,
+                                    selectedColor = selectedNavbarItemColor,
+                                    unselectedColor = unselectedNavbarItemColor
                                 )
                             }
+                        },
+                        floatingActionButton = {
+                            if (mainViewModel.showBottomBar.value) {
+                                Column(
+                                    modifier = Modifier.offset(y = 64.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    FloatingActionButton(
+                                        shape = CircleShape,
+                                        onClick = {
+                                            navController.navigate(NavRoutes.MAP.name)
+                                        }) {
+                                        Icon(
+                                            imageVector = Icons.Default.LocationOn,
+                                            contentDescription = "",
+                                            tint = if (mainViewModel.currentRoute.value == NavRoutes.MAP.name) selectedNavbarItemColor else unselectedNavbarItemColor
+                                        )
+                                    }
+                                    Text(
+                                        text = "Maps",
+                                        color = if (mainViewModel.currentRoute.value == NavRoutes.MAP.name) selectedNavbarItemColor else unselectedNavbarItemColor
+                                    )
+                                }
+                            }
+                        },
+                        floatingActionButtonPosition = FabPosition.Center
+                    ) {
+                        LoadingLayout {
+                            AppNavHost(
+                                modifier = Modifier.padding(bottom = it.calculateBottomPadding()),
+                                navController = navController
+                            )
                         }
-                    },
-                    floatingActionButtonPosition = FabPosition.Center
-                ) {
-                    LoadingLayout {
-                        AppNavHost(
-                            modifier = Modifier.padding(bottom = it.calculateBottomPadding()),
-                            navController = navController
-                        )
                     }
                 }
             }

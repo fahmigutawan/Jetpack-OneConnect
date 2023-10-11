@@ -1,23 +1,54 @@
 package com.example.oneconnect.presentation.profile
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import com.example.oneconnect.R
+import com.example.oneconnect.helper.SnackbarHandler
+import com.example.oneconnect.mainViewModel
+import com.example.oneconnect.presentation.profile.component.ProfileButtonsSection
+import com.example.oneconnect.presentation.profile.component.ProfileInformationCard
+import kotlin.system.exitProcess
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     navController: NavController
 ) {
+    BackHandler {
+        if(mainViewModel.backClicked.value){
+            exitProcess(0)
+        }else{
+            SnackbarHandler.showSnackbar("Klik kembali sekali lagi untuk keluar dari OneConnect")
+            mainViewModel.backClicked.value = true
+        }
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -27,8 +58,45 @@ fun ProfileScreen(
             )
         }
     ) {
-        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = it.calculateTopPadding())
+                .padding(horizontal = 16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(32.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                AsyncImage(
+                    modifier = Modifier
+                        .size(72.dp)
+                        .clip(CircleShape),
+                    model = R.drawable.icon_dummy_pp,
+                    contentDescription = ""
+                )
 
+                Text(text = "Fahmi")
+
+                Button(onClick = { /*TODO*/ }) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(text = "Edit Profil")
+                        Icon(imageVector = Icons.Default.Edit, contentDescription = "")
+                    }
+                }
+            }
+
+            ProfileInformationCard(phoneNumber = "08155393193", nik = "3518123312333213")
+
+            ProfileButtonsSection {
+                //Logout logic HERE
+            }
         }
     }
 }
