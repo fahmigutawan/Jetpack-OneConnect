@@ -1,6 +1,7 @@
 package com.example.oneconnect.presentation.profile
 
 import android.annotation.SuppressLint
+import android.provider.ContactsContract.Profile
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,13 +27,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.oneconnect.R
 import com.example.oneconnect.helper.SnackbarHandler
 import com.example.oneconnect.mainViewModel
+import com.example.oneconnect.navhost.NavRoutes
 import com.example.oneconnect.presentation.profile.component.ProfileButtonsSection
 import com.example.oneconnect.presentation.profile.component.ProfileInformationCard
+import com.example.oneconnect.presentation.profile.component.ProfileViewModel
 import kotlin.system.exitProcess
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,6 +44,8 @@ import kotlin.system.exitProcess
 fun ProfileScreen(
     navController: NavController
 ) {
+    val viewModel = hiltViewModel<ProfileViewModel>()
+
     BackHandler {
         if(mainViewModel.backClicked.value){
             exitProcess(0)
@@ -94,9 +100,16 @@ fun ProfileScreen(
 
             ProfileInformationCard(phoneNumber = "08155393193", nik = "3518123312333213")
 
-            ProfileButtonsSection {
-                //Logout logic HERE
-            }
+            ProfileButtonsSection(
+                onKeluarClicked = {
+                    viewModel.logout()
+                    navController.navigate(NavRoutes.LOGIN.name){
+                        popUpTo(navController.graph.id){
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
     }
 }

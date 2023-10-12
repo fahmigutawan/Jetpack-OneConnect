@@ -20,15 +20,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.oneconnect.R
+import com.example.oneconnect.navhost.NavRoutes
+import com.google.firebase.FirebaseException
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthProvider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     navController: NavController
 ) {
+    val viewModel = hiltViewModel<LoginViewModel>()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -48,15 +55,17 @@ fun LoginScreen(
         )
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            Text(text = "Masuk")
+            Text(text = "Masuk", style = MaterialTheme.typography.headlineMedium)
             Text(text = "Hai, silahkan masukkan nomor untuk melanjutkan.")
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = {
                     Text(text = "+62", color = Color.DarkGray)
                 },
-                value = "",
-                onValueChange = {},
+                value = viewModel.phoneNumber.value,
+                onValueChange = {
+                    viewModel.phoneNumber.value = it
+                },
                 label = {
                     Text(text = "Nomor Telepon")
                 },
@@ -68,10 +77,13 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 128.dp),
-            onClick = { /*TODO*/ },
+            onClick = {
+                navController.navigate("${NavRoutes.OTP.name}/+62${viewModel.phoneNumber.value}")
+            },
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
-            )
+            ),
+            enabled = android.util.Patterns.PHONE.matcher("+62${viewModel.phoneNumber.value}").matches()
         ) {
             Text(text = "Lanjutkan", color = MaterialTheme.colorScheme.onPrimary)
         }

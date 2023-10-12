@@ -48,11 +48,11 @@ fun HomeScreen(
             location = "Nganjuk",
             numbers = listOf(
                 PhoneNumberDomain(
-                    phoneNumber = "0812345678",
+                    phoneNumber = "+6281553993193",
                     contactType = "wa"
                 ),
                 PhoneNumberDomain(
-                    phoneNumber = "081234323313",
+                    phoneNumber = "+6281234323313",
                     contactType = "reg"
                 )
             )
@@ -63,11 +63,11 @@ fun HomeScreen(
             location = "Nganjuk",
             numbers = listOf(
                 PhoneNumberDomain(
-                    phoneNumber = "0841513413",
+                    phoneNumber = "+62841513413",
                     contactType = "wa"
                 ),
                 PhoneNumberDomain(
-                    phoneNumber = "08645746",
+                    phoneNumber = "+628645746",
                     contactType = "reg"
                 )
             )
@@ -78,11 +78,11 @@ fun HomeScreen(
             location = "Nganjuk",
             numbers = listOf(
                 PhoneNumberDomain(
-                    phoneNumber = "0898978657",
+                    phoneNumber = "+62898978657",
                     contactType = "wa"
                 ),
                 PhoneNumberDomain(
-                    phoneNumber = "08156353345",
+                    phoneNumber = "+628156353345",
                     contactType = "reg"
                 )
             )
@@ -187,7 +187,7 @@ fun HomeScreen(
                 onCallClicked = { type, number ->
                     when(type){
                         "wa" -> {
-                            val numFix = "https://api.whatsapp.com/send?phone=${number.replaceFirstChar { "62" }}"
+                            val numFix = "https://api.whatsapp.com/send?phone=${number.replace("+", "") }}"
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(numFix))
                             context.startActivity(intent)
                         }

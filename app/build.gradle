@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
     id 'com.google.dagger.hilt.android'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -52,6 +53,10 @@ android {
 }
 
 dependencies {
+    implementation 'com.google.firebase:firebase-auth-ktx:22.1.2'
+    implementation 'com.google.firebase:firebase-firestore-ktx:24.8.1'
+    implementation 'com.google.firebase:firebase-database-ktx:20.2.2'
+
     def accompanist_version = "0.28.0"
 
     implementation 'androidx.core:core-ktx:1.8.0'

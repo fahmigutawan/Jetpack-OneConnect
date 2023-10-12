@@ -5,5 +5,6 @@ enum class NavRoutes {
     BERANDA,
     MAP,
     PROFIL,
-    LOGIN
+    LOGIN,
+    OTP
 }

@@ -1,14 +1,15 @@
-package com.example.oneconnect.presentation.login
+package com.example.oneconnect.presentation.profile.component
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.example.oneconnect.data.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(
+class ProfileViewModel @Inject constructor(
     private val repository: Repository
-) : ViewModel() {
-    val phoneNumber = mutableStateOf("")
+) :ViewModel() {
+    fun logout(){
+        repository.logout()
+    }
 }
