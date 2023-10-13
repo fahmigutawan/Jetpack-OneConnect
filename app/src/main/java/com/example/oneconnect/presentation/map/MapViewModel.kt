@@ -4,32 +4,39 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.oneconnect.data.Repository
+import com.example.oneconnect.model.domain.general.PhoneNumberDomain
 import com.example.oneconnect.model.domain.home.HomeEmergencyTypeDomain
 import com.example.oneconnect.model.domain.map.MapEmergencyProviderDomain
 import com.example.oneconnect.model.domain.map.MapEmergencyTypeDomain
+import com.example.oneconnect.model.external.MapboxGeocodingResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val repository: Repository
-) :ViewModel(){
+) : ViewModel() {
+    val useDummyLocation = mutableStateOf<Boolean?>(null)
+    val copiedNumber = mutableStateOf("")
+
     val showRationaleDialog = mutableStateOf(false)
     val showPermissionWarningDialog = mutableStateOf(false)
-    val useDummyLocation = mutableStateOf<Boolean?>(null)
 
     val userLong = mutableStateOf(112.6150769)
     val userLat = mutableStateOf(-7.9540899)
 
     val emTypes = mutableStateListOf<MapEmergencyTypeDomain>()
     val emProviders = mutableStateListOf<MapEmergencyProviderDomain>()
+    val emPhoneNumbers = mutableStateListOf<PhoneNumberDomain>()
 
     val pickedEmergencyProvider = mutableStateOf<MapEmergencyProviderDomain?>(null)
-
+    val pickedEmergencyProviderLocation = mutableStateOf<MapboxGeocodingResponse?>(null)
     val pickedEmTypeId = mutableStateOf("")
 
-    fun getAllEmergencyProvider(){
+    fun getAllEmergencyProvider() {
         repository.getAllEmergencyProvider(
             onSuccess = {
                 emProviders.clear()
@@ -52,8 +59,8 @@ class MapViewModel @Inject constructor(
     }
 
     fun getAllEmergencyProviderByTypeId(
-        emTypeId:String
-    ){
+        emTypeId: String
+    ) {
         repository.getAllEmergencyProviderByTypeId(
             emTypeId = emTypeId,
             onSuccess = {
@@ -74,6 +81,43 @@ class MapViewModel @Inject constructor(
                 Log.e("ERROR", it.toString())
             }
         )
+    }
+
+    fun getContactByProviderId(
+        emPvdId: String
+    ) {
+        repository.getContactByProviderId(
+            emPvdId = emPvdId,
+            onSuccess = {
+                emPhoneNumbers.clear()
+                emPhoneNumbers.addAll(
+                    it.map { contact ->
+                        PhoneNumberDomain(
+                            phoneNumber = contact.number ?: "",
+                            contactType = contact.contact_type ?: ""
+                        )
+                    }
+                )
+            },
+            onFailed = {
+                //TODO
+            }
+        )
+    }
+
+    fun getLocationByLongLat(long: Double, lat: Double) {
+        viewModelScope.launch {
+            repository.getLocationByLongLat(
+                long,
+                lat,
+                onSuccess = {
+                    pickedEmergencyProviderLocation.value = it
+                },
+                onFailed = {
+                    Log.e("ERROR", it.toString())
+                }
+            )
+        }
     }
 
     init {

@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -68,8 +70,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberNavController()
-            val selectedNavbarItemColor = Color.Blue
-            val unselectedNavbarItemColor = Color.Gray
             val snackbarHostState = remember { SnackbarHostState() }
             val coroutineScope = rememberCoroutineScope()
 
@@ -119,6 +119,9 @@ class MainActivity : ComponentActivity() {
             }
 
             OneConnectTheme {
+                val selectedNavbarItemColor = MaterialTheme.colorScheme.primary
+                val unselectedNavbarItemColor = Color.Gray
+
                 Scaffold(
                     snackbarHost = {
                         SnackbarHost(
@@ -172,14 +175,23 @@ class MainActivity : ComponentActivity() {
                                     verticalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     FloatingActionButton(
+                                        modifier = Modifier.border(
+                                            border = BorderStroke(
+                                                width = 2.dp,
+                                                color = if (mainViewModel.currentRoute.value in mapRoutes) Color.White else Color.LightGray
+                                            ),
+                                            shape = CircleShape
+                                        ),
                                         shape = CircleShape,
                                         onClick = {
                                             navController.navigate(NavRoutes.MAP.name)
-                                        }) {
+                                        },
+                                        containerColor = if (mainViewModel.currentRoute.value in mapRoutes) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimary,
+                                        contentColor = if (mainViewModel.currentRoute.value in mapRoutes) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
+                                    ) {
                                         Icon(
                                             imageVector = Icons.Default.LocationOn,
                                             contentDescription = "",
-                                            tint = if (mainViewModel.currentRoute.value in mapRoutes) selectedNavbarItemColor else unselectedNavbarItemColor
                                         )
                                     }
                                     Text(

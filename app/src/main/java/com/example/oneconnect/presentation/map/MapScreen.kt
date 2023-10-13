@@ -4,10 +4,8 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.Settings
-import android.util.Log
 import android.view.LayoutInflater
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
@@ -44,7 +42,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
@@ -52,17 +53,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.oneconnect.R
-import com.example.oneconnect.databinding.EmergencyProviderItemBinding
 import com.example.oneconnect.databinding.MapboxViewBinding
 import com.example.oneconnect.global_component.AppDialog
 import com.example.oneconnect.global_component.AppDialogButtonOrientation
 import com.example.oneconnect.global_component.EmergencyTypeCard
 import com.example.oneconnect.global_component.CategoryCardType
 import com.example.oneconnect.global_component.NonLazyVerticalGrid
+import com.example.oneconnect.global_component.SingleContactItem
 import com.example.oneconnect.helper.EmergencyTypeIcon
 import com.example.oneconnect.helper.SnackbarHandler
 import com.example.oneconnect.mainViewModel
-import com.example.oneconnect.model.domain.map.MapEmergencyTypeDomain
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -72,16 +72,12 @@ import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
-import com.mapbox.maps.ViewAnnotationAnchor
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
-import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.CircleAnnotationOptions
-import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createCircleAnnotationManager
-import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.addOnMoveListener
 import com.mapbox.maps.plugin.locationcomponent.location
@@ -104,9 +100,10 @@ fun MapScreen(
         permission = Manifest.permission.ACCESS_COARSE_LOCATION
     )
     val context = LocalContext.current
-    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-    val uri = Uri.fromParts("package", context.packageName, null)
-    intent.data = uri
+    val clipboardManager = LocalClipboardManager.current
+    val openSettingIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+    val openSettingUri = Uri.fromParts("package", context.packageName, null)
+    openSettingIntent.data = openSettingUri
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     val myLocationIcon = remember {
         mutableStateOf(Icons.Default.GpsFixed)
@@ -167,7 +164,7 @@ fun MapScreen(
             secondButton = {
                 Button(
                     onClick = {
-                        context.startActivity(intent)
+                        context.startActivity(openSettingIntent)
                     },
                     colors = ButtonDefaults.buttonColors(
                         contentColor = MaterialTheme.colorScheme.onPrimary
@@ -246,9 +243,54 @@ fun MapScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
+                        modifier = Modifier.weight(1f),
                         text = viewModel.pickedEmergencyProvider.value?.name ?: "...",
                         style = MaterialTheme.typography.titleMedium,
-                        color = Color.Black
+                        color = Color.Black,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        text = viewModel
+                            .pickedEmergencyProviderLocation
+                            .value
+                            ?.features
+                            ?.get(0)
+                            ?.properties?.place_formatted ?: "...",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                viewModel.emPhoneNumbers.forEach { phoneNumber ->
+                    SingleContactItem(
+                        onCopyClicked = {
+                            clipboardManager.setText(AnnotatedString(it))
+                            viewModel.copiedNumber.value = it
+                            SnackbarHandler.showSnackbar("Nomor telah di-copy")
+                        },
+                        onCallClicked = { type, number ->
+                            when (type) {
+                                "wa" -> {
+                                    val numFix =
+                                        "https://api.whatsapp.com/send?phone=${number.replace("+", "")}}"
+                                    val callIntent = Intent(Intent.ACTION_VIEW, Uri.parse(numFix))
+                                    context.startActivity(callIntent)
+                                }
+
+                                else -> {
+                                    val callUri = Uri.parse("tel:$number")
+                                    val callIntent = Intent(Intent.ACTION_DIAL, callUri)
+                                    context.startActivity(callIntent)
+                                }
+                            }
+                        },
+                        copiedNumber = viewModel.copiedNumber.value,
+                        phoneNumber = phoneNumber
                     )
                 }
             }
@@ -344,7 +386,7 @@ fun MapScreen(
                 compose.setContent {
                     Box(
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(48.dp)
                             .clip(CircleShape)
                             .border(
                                 border = BorderStroke(
@@ -356,6 +398,24 @@ fun MapScreen(
                             .background(EmergencyTypeIcon.getContainerColor(domain.em_type))
                             .clickable {
                                 viewModel.pickedEmergencyProvider.value = domain
+
+                                it.camera.flyTo(
+                                    CameraOptions
+                                        .Builder()
+                                        .center(
+                                            Point.fromLngLat(
+                                                domain.longitude,
+                                                domain.latitude
+                                            )
+                                        )
+                                        .zoom(16.0)
+                                        .build()
+                                )
+
+                                viewModel.getLocationByLongLat(
+                                    domain.longitude,
+                                    domain.latitude
+                                )
                             },
                         contentAlignment = Alignment.Center
                     ) {
@@ -376,16 +436,22 @@ fun MapScreen(
         }
     }
 
-    LaunchedEffect(key1 = true) {
-        viewModel.pickedEmTypeId.value = emTypeId
-    }
-
     LaunchedEffect(key1 = viewModel.pickedEmTypeId.value) {
         if (viewModel.pickedEmTypeId.value.isEmpty()) {
             viewModel.getAllEmergencyProvider()
         } else {
             viewModel.getAllEmergencyProviderByTypeId(viewModel.pickedEmTypeId.value)
         }
+    }
+
+    LaunchedEffect(key1 = viewModel.pickedEmergencyProvider.value) {
+        viewModel.pickedEmergencyProvider.value?.let { provider ->
+            viewModel.getContactByProviderId(provider.em_pvd_id)
+        }
+    }
+
+    LaunchedEffect(key1 = true) {
+        viewModel.pickedEmTypeId.value = emTypeId
     }
 
     BackHandler {

@@ -10,6 +10,12 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.android.Android
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.logging.Logging
+import io.ktor.serialization.gson.gson
 import javax.inject.Singleton
 
 @Module
@@ -29,15 +35,31 @@ object Module {
 
     @Provides
     @Singleton
+    fun provideHttpClient() = HttpClient(Android){
+        install(ContentNegotiation){
+            gson()
+        }
+
+        install(HttpTimeout){
+            requestTimeoutMillis = 10000
+        }
+
+        install(Logging)
+    }
+
+    @Provides
+    @Singleton
     fun provideRepository(
         @ApplicationContext context: Context,
         auth: FirebaseAuth,
         realtimeDb: FirebaseDatabase,
-        firestore: FirebaseFirestore
+        firestore: FirebaseFirestore,
+        httpClient: HttpClient
     ) = Repository(
         context = context,
         auth = auth,
         realtimeDb = realtimeDb,
-        firestore = firestore
+        firestore = firestore,
+        httpClient = httpClient
     )
 }

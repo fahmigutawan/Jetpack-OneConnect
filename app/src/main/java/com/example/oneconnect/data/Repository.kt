@@ -2,6 +2,8 @@ package com.example.oneconnect.data
 
 import android.content.Context
 import com.example.oneconnect.helper.UserDataInputStatus
+import com.example.oneconnect.model.external.MapboxGeocodingResponse
+import com.example.oneconnect.model.struct.ContactModel
 import com.example.oneconnect.model.struct.EmergencyProviderModel
 import com.example.oneconnect.model.struct.EmergencyTypeModel
 import com.example.oneconnect.model.struct.UserModel
@@ -12,6 +14,10 @@ import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.http.HttpStatusCode
 import javax.inject.Inject
 
 
@@ -19,7 +25,8 @@ class Repository @Inject constructor(
     private val context: Context,
     private val auth: FirebaseAuth,
     private val realtimeDb: FirebaseDatabase,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    private val httpClient: HttpClient
 ) {
     fun sendOtp(options: (auth: FirebaseAuth) -> PhoneAuthOptions) {
         PhoneAuthProvider.verifyPhoneNumber(options(auth))
@@ -143,11 +150,11 @@ class Repository @Inject constructor(
     fun getAllEmergencyProvider(
         onSuccess: (List<EmergencyProviderModel>) -> Unit,
         onFailed: (Exception) -> Unit
-    ){
+    ) {
         firestore
             .collection("em_srv_provider")
             .addSnapshotListener { value, error ->
-                if(error != null){
+                if (error != null) {
                     onFailed(error)
                     return@addSnapshotListener
                 }
@@ -170,15 +177,15 @@ class Repository @Inject constructor(
     }
 
     fun getAllEmergencyProviderByTypeId(
-        emTypeId:String,
+        emTypeId: String,
         onSuccess: (List<EmergencyProviderModel>) -> Unit,
         onFailed: (Exception) -> Unit
-    ){
+    ) {
         firestore
             .collection("em_srv_provider")
-            .whereEqualTo("em_type",emTypeId)
+            .whereEqualTo("em_type", emTypeId)
             .addSnapshotListener { value, error ->
-                if(error != null){
+                if (error != null) {
                     onFailed(error)
                     return@addSnapshotListener
                 }
@@ -192,6 +199,66 @@ class Repository @Inject constructor(
                                 latitude = doc["latitude"] as String,
                                 name = doc["name"] as String,
                                 em_type = doc["em_type"] as String
+                            )
+                        }
+                    )
+                    return@addSnapshotListener
+                }
+            }
+    }
+
+    suspend fun getLocationByLongLat(
+        longitude: Double,
+        latitude: Double,
+        onSuccess:(MapboxGeocodingResponse) -> Unit,
+        onFailed: (Exception) -> Unit
+    ) {
+        val res = httpClient.get(
+            "https://api.mapbox.com/search/geocode/v6/reverse" +
+                    "?language=id" +
+                    "&longitude=$longitude" +
+                    "&latitude=$latitude" +
+                    "&access_token=sk.eyJ1IjoiZmFobWlndXRhd2FuIiwiYSI6ImNsbmVwdXAxcjBremEyam1uZGthdXhiMmUifQ.LR6usbmqClTCkQTAHFqFuw"
+        )
+
+        try{
+            when(res.status){
+                HttpStatusCode.OK -> {
+                    onSuccess(res.body())
+                }
+
+                else -> {
+                    onFailed(java.lang.Exception("Terjadi kesalahan"))
+                }
+            }
+        }catch (e:Exception){
+            onFailed(e)
+        }
+    }
+
+    fun getContactByProviderId(
+        emPvdId:String,
+        onSuccess: (List<ContactModel>) -> Unit,
+        onFailed: (Exception) -> Unit
+    ){
+        firestore
+            .collection("contact")
+            .whereEqualTo("em_pvd_id", emPvdId)
+            .orderBy("contact_type")
+            .addSnapshotListener { value, error ->
+                if(error != null){
+                    onFailed(error)
+                    return@addSnapshotListener
+                }
+
+                value?.let {
+                    onSuccess(
+                        it.documents.map { doc ->
+                            ContactModel(
+                                contact_id = doc["contact_id"] as String,
+                                em_pvd_id = doc["em_pvd_id"] as String,
+                                number = doc["number"] as String,
+                                contact_type = doc["contact_type"] as String
                             )
                         }
                     )

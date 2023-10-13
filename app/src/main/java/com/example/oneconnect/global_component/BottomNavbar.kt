@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -24,7 +22,8 @@ import com.example.oneconnect.navhost.NavRoutes
 
 data class BottomNavbarItem(
     val route: String,
-    val iconId: Int,
+    val selectedIconId: Int,
+    val unselectedIconId: Int,
     val word: String
 )
 
@@ -38,19 +37,24 @@ fun BottomNavbar(
     val items: List<BottomNavbarItem?> = listOf(
         BottomNavbarItem(
             route = NavRoutes.BERANDA.name,
-            iconId = R.drawable.navbar_home,
-            "Beranda"
+            selectedIconId = R.drawable.navbar_home_selected,
+            unselectedIconId = R.drawable.navbar_home_unselected,
+            word = "Beranda"
         ),
         null,
         BottomNavbarItem(
             route = NavRoutes.PROFIL.name,
-            iconId = R.drawable.navbar_profil,
-            "Profil"
+            selectedIconId = R.drawable.navbar_profil_selected,
+            unselectedIconId = R.drawable.navbar_profil_unselected,
+            word = "Profil"
         )
     )
     val scrWidth = LocalConfiguration.current.screenWidthDp
 
-    BottomAppBar(tonalElevation = 8.dp) {
+    BottomAppBar(
+        tonalElevation = 8.dp,
+        containerColor = Color.White
+    ) {
         Row(
             modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically,
@@ -72,7 +76,7 @@ fun BottomNavbar(
                             verticalArrangement = Arrangement.Center
                         ) {
                             Icon(
-                                painter = rememberAsyncImagePainter(model = item.iconId),
+                                painter = rememberAsyncImagePainter(model = if (currentRoute == item.route) item.selectedIconId else item.unselectedIconId),
                                 contentDescription = "",
                                 tint = if (currentRoute == item.route) selectedColor else unselectedColor
                             )

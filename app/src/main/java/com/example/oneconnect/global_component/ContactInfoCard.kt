@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.oneconnect.R
+import com.example.oneconnect.helper.ContactTypeIcon
 import com.example.oneconnect.model.domain.general.PhoneNumberDomain
 
 @Composable
@@ -69,61 +70,12 @@ fun ContactInfoCard(
             }
 
             phoneNumber.forEach { phoneNumber ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(32.dp),
-                            painter = rememberAsyncImagePainter(
-                                model = if (phoneNumber.contactType == "wa") R.drawable.icon_whatsapp else R.drawable.icon_phone
-                            ),
-                            contentDescription = "",
-                            tint = Color.Unspecified
-                        )
-                        Text(
-                            text = phoneNumber.phoneNumber,
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 1,
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Button(
-                            onClick = { onCopyClicked(phoneNumber.phoneNumber) },
-                            shape = RoundedCornerShape(Int.MAX_VALUE.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (copiedNumber == phoneNumber.phoneNumber) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = if (copiedNumber == phoneNumber.phoneNumber) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
-                            )
-                        ) {
-                            Icon(
-                                painter = rememberAsyncImagePainter(model = if (copiedNumber == phoneNumber.phoneNumber) R.drawable.icon_copied else R.drawable.icon_copy),
-                                contentDescription = ""
-                            )
-                        }
-
-                        Button(
-                            onClick = {
-                                onCallClicked(
-                                    phoneNumber.contactType,
-                                    phoneNumber.phoneNumber
-                                )
-                            },
-                            shape = RoundedCornerShape(Int.MAX_VALUE.dp)
-                        ) {
-                            Icon(
-                                painter = rememberAsyncImagePainter(model = R.drawable.icon_call),
-                                contentDescription = ""
-                            )
-                        }
-                    }
-                }
+                SingleContactItem(
+                    onCopyClicked = onCopyClicked,
+                    onCallClicked = onCallClicked,
+                    copiedNumber = copiedNumber,
+                    phoneNumber = phoneNumber
+                )
             }
         }
     }
