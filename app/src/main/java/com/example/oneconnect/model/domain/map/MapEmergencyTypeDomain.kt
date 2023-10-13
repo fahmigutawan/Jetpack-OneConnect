@@ -1,6 +1,6 @@
 package com.example.oneconnect.model.domain.map
 
-data class MapCategoryDomain(
-    val categoryId:String,
+data class MapEmergencyTypeDomain(
+    val emTypeId:String,
     val word:String
 )

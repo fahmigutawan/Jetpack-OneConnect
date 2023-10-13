@@ -15,7 +15,7 @@ class SplashViewModel @Inject constructor(
 ) : ViewModel() {
     fun precheck(
         onLoginChecked: (isLogin: Boolean) -> Unit,
-        onUserDataInputStatusCheck: (UserDataInputStatus) -> Unit
+        onUserDataInputStatusCheck: (String, UserDataInputStatus) -> Unit
     ) {
         viewModelScope.launch {
             val loginStatus = repository.isLogin()
@@ -25,8 +25,8 @@ class SplashViewModel @Inject constructor(
             if(loginStatus){
                 repository.checkUserInputDataStatus(
                     uid = repository.uid(),
-                    onSuccess = {
-                        onUserDataInputStatusCheck(it)
+                    onSuccess = { phoneNumber, status ->
+                        onUserDataInputStatusCheck(phoneNumber, status)
                     },
                     onFailed = {
                         //TODO

@@ -44,7 +44,7 @@ fun LoginScreen(
                 rememberScrollState()
             ),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.Center
     ) {
         AsyncImage(
             modifier = Modifier
@@ -54,7 +54,7 @@ fun LoginScreen(
             contentDescription = ""
         )
 
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 64.dp)) {
             Text(text = "Masuk", style = MaterialTheme.typography.headlineMedium)
             Text(text = "Hai, silahkan masukkan nomor untuk melanjutkan.")
             OutlinedTextField(

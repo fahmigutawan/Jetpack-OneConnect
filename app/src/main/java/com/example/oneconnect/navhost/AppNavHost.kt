@@ -15,6 +15,7 @@ import com.example.oneconnect.presentation.map.MapScreen
 import com.example.oneconnect.presentation.otp.OtpScreen
 import com.example.oneconnect.presentation.profile.ProfileScreen
 import com.example.oneconnect.presentation.splash.SplashScreen
+import com.example.oneconnect.presentation.user_data_input.UserDataInputScreen
 
 @Composable
 fun AppNavHost(
@@ -59,6 +60,35 @@ fun AppNavHost(
             OtpScreen(
                 phoneNumber = phoneNumber,
                 navController = navController
+            )
+        }
+
+        composable(
+            route = "${NavRoutes.USER_DATA_INPUT.name}/{phoneNumber}",
+            arguments = listOf(
+                navArgument("phoneNumber") {
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            val phoneNumber = it.arguments?.getString("phoneNumber") ?: ""
+
+            UserDataInputScreen(phoneNumber = phoneNumber, navController = navController)
+        }
+
+        composable(
+            route = "${NavRoutes.MAP.name}/{em_type_id}",
+            arguments = listOf(
+                navArgument("em_type_id"){
+                    type = NavType.StringType
+                }
+            )
+        ){
+            val emTypeId = it.arguments?.getString("em_type_id") ?: ""
+
+            MapScreen(
+                navController = navController,
+                emTypeId = emTypeId
             )
         }
     }

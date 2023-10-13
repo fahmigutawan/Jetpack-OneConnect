@@ -102,7 +102,11 @@ class MainActivity : ComponentActivity() {
                 mainViewModel.currentRoute.value = destination.route ?: NavRoutes.SPLASH.name
 
                 when (destination.route) {
-                    NavRoutes.BERANDA.name, NavRoutes.MAP.name, NavRoutes.PROFIL.name -> mainViewModel.showBottomBar.value =
+                    NavRoutes.BERANDA.name,
+                    NavRoutes.MAP.name,
+                    NavRoutes.PROFIL.name,
+                    "${NavRoutes.MAP.name}/{em_type_id}"
+                    -> mainViewModel.showBottomBar.value =
                         true
 
                     else -> mainViewModel.showBottomBar.value = false
@@ -156,6 +160,11 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                         floatingActionButton = {
+                            val mapRoutes = listOf(
+                                NavRoutes.MAP.name,
+                                "${NavRoutes.MAP.name}/{em_type_id}"
+                            )
+
                             if (mainViewModel.showBottomBar.value) {
                                 Column(
                                     modifier = Modifier.offset(y = 64.dp),
@@ -170,12 +179,12 @@ class MainActivity : ComponentActivity() {
                                         Icon(
                                             imageVector = Icons.Default.LocationOn,
                                             contentDescription = "",
-                                            tint = if (mainViewModel.currentRoute.value == NavRoutes.MAP.name) selectedNavbarItemColor else unselectedNavbarItemColor
+                                            tint = if (mainViewModel.currentRoute.value in mapRoutes) selectedNavbarItemColor else unselectedNavbarItemColor
                                         )
                                     }
                                     Text(
                                         text = "Maps",
-                                        color = if (mainViewModel.currentRoute.value == NavRoutes.MAP.name) selectedNavbarItemColor else unselectedNavbarItemColor
+                                        color = if (mainViewModel.currentRoute.value in mapRoutes) selectedNavbarItemColor else unselectedNavbarItemColor
                                     )
                                 }
                             }

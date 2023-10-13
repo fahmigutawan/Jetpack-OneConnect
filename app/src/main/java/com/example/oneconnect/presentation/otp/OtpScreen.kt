@@ -1,6 +1,7 @@
 package com.example.oneconnect.presentation.otp
 
 import android.app.Activity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,6 +31,7 @@ import coil.compose.AsyncImage
 import com.example.oneconnect.R
 import com.example.oneconnect.helper.LoadingHandler
 import com.example.oneconnect.helper.SnackbarHandler
+import com.example.oneconnect.helper.UserDataInputStatus
 import com.example.oneconnect.navhost.NavRoutes
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
@@ -54,7 +56,23 @@ fun OtpScreen(
             viewModel.signInWithCredential(
                 credential = p0,
                 onSuccess = {
-                    //TODO
+                    when (it) {
+                        UserDataInputStatus.INPUTTED -> {
+                            navController.navigate(NavRoutes.BERANDA.name) {
+                                popUpTo(navController.graph.id) {
+                                    inclusive = true
+                                }
+                            }
+                        }
+
+                        UserDataInputStatus.HAVE_NOT_INPUTTED -> {
+                            navController.navigate("${NavRoutes.USER_DATA_INPUT.name}/$phoneNumber") {
+                                popUpTo(navController.graph.id) {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                    }
                     LoadingHandler.dismiss()
                 },
                 onFailed = {
@@ -64,9 +82,7 @@ fun OtpScreen(
             )
         }
 
-        override fun onVerificationFailed(p0: FirebaseException) {
-            SnackbarHandler.showSnackbar("ERROR: ${p0.message}")
-        }
+        override fun onVerificationFailed(p0: FirebaseException) {}
 
         override fun onCodeSent(
             verificationId: String,
@@ -134,11 +150,13 @@ fun OtpScreen(
             )
         }
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 128.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 128.dp),
                 onClick = {
                     LoadingHandler.loading()
 
@@ -150,11 +168,27 @@ fun OtpScreen(
                     viewModel.signInWithCredential(
                         credential = credential,
                         onSuccess = {
-                            //TODO
+                            when (it) {
+                                UserDataInputStatus.INPUTTED -> {
+                                    navController.navigate(NavRoutes.BERANDA.name) {
+                                        popUpTo(navController.graph.id) {
+                                            inclusive = true
+                                        }
+                                    }
+                                }
+
+                                UserDataInputStatus.HAVE_NOT_INPUTTED -> {
+                                    navController.navigate("${NavRoutes.USER_DATA_INPUT.name}/$phoneNumber") {
+                                        popUpTo(navController.graph.id) {
+                                            inclusive = true
+                                        }
+                                    }
+                                }
+                            }
                             LoadingHandler.dismiss()
                         },
                         onFailed = {
-                            SnackbarHandler.showSnackbar("ERROR: ${it.message}")
+//                            SnackbarHandler.showSnackbar("ERROR: ${it.message}")
                             LoadingHandler.dismiss()
                         }
                     )
@@ -167,25 +201,32 @@ fun OtpScreen(
                 Text(text = "Verifikasi OTP", color = MaterialTheme.colorScheme.onPrimary)
             }
 
-            Text(text = "Tunggu ${viewModel.resendCountdown.value} detik lagi untuk kirim ulang")
-            TextButton(
-                onClick = {
-                    viewModel.sendOtp(
-                        options = { auth ->
-                            PhoneAuthOptions.newBuilder(auth)
-                                .setPhoneNumber(phoneNumber)
-                                .setTimeout(60L, TimeUnit.SECONDS)
-                                .setActivity(context as Activity)
-                                .setCallbacks(callback)
-                                .build()
-                        }
-                    )
-                    viewModel.resendCountdown.value = 60
-                },
-                enabled = viewModel.resendCountdown.value == 0
-            ) {
-                Text(text = "Kirim Ulang")
-            }
+            Text(
+                modifier = Modifier.padding(top = 16.dp),
+                style = MaterialTheme.typography.bodySmall,
+                text = "Tunggu ${viewModel.resendCountdown.value} detik lagi untuk kirim ulang"
+            )
+
+            Text(
+                modifier = Modifier.clickable(
+                    onClick = {
+                        viewModel.sendOtp(
+                            options = { auth ->
+                                PhoneAuthOptions.newBuilder(auth)
+                                    .setPhoneNumber(phoneNumber)
+                                    .setTimeout(60L, TimeUnit.SECONDS)
+                                    .setActivity(context as Activity)
+                                    .setCallbacks(callback)
+                                    .build()
+                            }
+                        )
+                        viewModel.resendCountdown.value = 60
+                    },
+                    enabled = viewModel.resendCountdown.value == 0
+                ),
+                color = if (viewModel.resendCountdown.value == 0) MaterialTheme.colorScheme.primary else Color.LightGray,
+                text = "Kirim Ulang"
+            )
         }
     }
 }

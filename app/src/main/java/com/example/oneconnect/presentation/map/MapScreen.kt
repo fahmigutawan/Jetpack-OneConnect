@@ -4,77 +4,88 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GpsFixed
 import androidx.compose.material.icons.filled.GpsNotFixed
-import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.oneconnect.R
+import com.example.oneconnect.databinding.EmergencyProviderItemBinding
 import com.example.oneconnect.databinding.MapboxViewBinding
 import com.example.oneconnect.global_component.AppDialog
 import com.example.oneconnect.global_component.AppDialogButtonOrientation
-import com.example.oneconnect.global_component.CategoryCard
+import com.example.oneconnect.global_component.EmergencyTypeCard
 import com.example.oneconnect.global_component.CategoryCardType
 import com.example.oneconnect.global_component.NonLazyVerticalGrid
+import com.example.oneconnect.helper.EmergencyTypeIcon
 import com.example.oneconnect.helper.SnackbarHandler
 import com.example.oneconnect.mainViewModel
-import com.example.oneconnect.model.domain.home.HomeCategoryDomain
-import com.example.oneconnect.ui.theme.seed
+import com.example.oneconnect.model.domain.map.MapEmergencyTypeDomain
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapView
+import com.mapbox.maps.ViewAnnotationAnchor
 import com.mapbox.maps.extension.style.expressions.dsl.generated.interpolate
+import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.plugin.LocationPuck2D
-import com.mapbox.maps.plugin.PuckBearingSource
 import com.mapbox.maps.plugin.animation.camera
 import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.CircleAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createCircleAnnotationManager
+import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
 import com.mapbox.maps.plugin.gestures.OnMoveListener
 import com.mapbox.maps.plugin.gestures.addOnMoveListener
-import com.mapbox.maps.plugin.gestures.gestures
-import com.mapbox.maps.plugin.locationcomponent.OnIndicatorBearingChangedListener
-import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
-import com.mapbox.maps.plugin.locationcomponent.location2
+import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import kotlin.system.exitProcess
 
 
@@ -82,27 +93,9 @@ import kotlin.system.exitProcess
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(
-    navController: NavController
+    navController: NavController,
+    emTypeId: String = ""
 ) {
-    val dummyCategories = listOf(
-        HomeCategoryDomain(
-            "1",
-            "Ambulans"
-        ),
-        HomeCategoryDomain(
-            "2",
-            "Damkar"
-        ),
-        HomeCategoryDomain(
-            "3",
-            "SAR"
-        ),
-        HomeCategoryDomain(
-            "4",
-            "Polisi"
-        )
-    )
-
     val mapView = remember {
         mutableStateOf<MapView?>(null)
     }
@@ -154,7 +147,10 @@ fun MapScreen(
                 Button(
                     onClick = {
                         mapPermission.launchPermissionRequest()
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 ) {
                     Text(text = "Ijinkan")
                 }
@@ -172,7 +168,10 @@ fun MapScreen(
                 Button(
                     onClick = {
                         context.startActivity(intent)
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 ) {
                     Text(text = "Buka setting")
                 }
@@ -193,7 +192,10 @@ fun MapScreen(
                 Button(
                     onClick = {
                         viewModel.useDummyLocation.value = false
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 ) {
                     Text(text = "Gunakan Lokasi Realtime")
                 }
@@ -202,7 +204,10 @@ fun MapScreen(
                 Button(
                     onClick = {
                         viewModel.useDummyLocation.value = true
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 ) {
                     Text(text = "Gunakan Lokasi Dummy")
                 }
@@ -220,6 +225,34 @@ fun MapScreen(
         ) != PackageManager.PERMISSION_GRANTED
     ) {
         return
+    }
+
+    if (viewModel.pickedEmergencyProvider.value != null) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                viewModel.pickedEmergencyProvider.value = null
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = viewModel.pickedEmergencyProvider.value?.name ?: "...",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.Black
+                    )
+                }
+            }
+        }
     }
 
     LaunchedEffect(key1 = viewModel.useDummyLocation.value) {
@@ -293,10 +326,72 @@ fun MapScreen(
         }
     }
 
+    LaunchedEffect(key1 = viewModel.emProviders.toList()) {
+        mapView.value?.let {
+            val viewAnnotationManager = it.viewAnnotationManager
+            viewAnnotationManager.removeAllViewAnnotations()
+
+            viewModel.emProviders.forEach { domain ->
+                val view = viewAnnotationManager.addViewAnnotation(
+                    resId = R.layout.emergency_provider_item,
+                    options = viewAnnotationOptions {
+                        geometry(Point.fromLngLat(domain.longitude, domain.latitude))
+                    }
+                )
+
+                val compose = view.findViewById<ComposeView>(R.id.compose_item)
+
+                compose.setContent {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .border(
+                                border = BorderStroke(
+                                    width = 2.dp,
+                                    color = Color.White
+                                ),
+                                shape = CircleShape
+                            )
+                            .background(EmergencyTypeIcon.getContainerColor(domain.em_type))
+                            .clickable {
+                                viewModel.pickedEmergencyProvider.value = domain
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = rememberAsyncImagePainter(
+                                model = EmergencyTypeIcon.getIconId(
+                                    domain.em_type
+                                ) ?: R.drawable.ic_circle
+                            ),
+                            contentDescription = "",
+                            tint = EmergencyTypeIcon.getContentColor(
+                                domain.em_type
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = true) {
+        viewModel.pickedEmTypeId.value = emTypeId
+    }
+
+    LaunchedEffect(key1 = viewModel.pickedEmTypeId.value) {
+        if (viewModel.pickedEmTypeId.value.isEmpty()) {
+            viewModel.getAllEmergencyProvider()
+        } else {
+            viewModel.getAllEmergencyProviderByTypeId(viewModel.pickedEmTypeId.value)
+        }
+    }
+
     BackHandler {
-        if(mainViewModel.backClicked.value){
+        if (mainViewModel.backClicked.value) {
             exitProcess(0)
-        }else{
+        } else {
             SnackbarHandler.showSnackbar("Klik kembali sekali lagi untuk keluar dari OneConnect")
             mainViewModel.backClicked.value = true
         }
@@ -306,20 +401,18 @@ fun MapScreen(
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 myLocationIcon.value = Icons.Default.GpsFixed
-                mapView.value?.let {
-                    it.camera.flyTo(
-                        CameraOptions
-                            .Builder()
-                            .center(
-                                Point.fromLngLat(
-                                    viewModel.userLong.value,
-                                    viewModel.userLat.value
-                                )
+                mapView.value?.camera?.flyTo(
+                    CameraOptions
+                        .Builder()
+                        .center(
+                            Point.fromLngLat(
+                                viewModel.userLong.value,
+                                viewModel.userLat.value
                             )
-                            .zoom(15.0)
-                            .build()
-                    )
-                }
+                        )
+                        .zoom(15.0)
+                        .build()
+                )
             }) {
                 Icon(imageVector = myLocationIcon.value, contentDescription = "")
             }
@@ -354,14 +447,20 @@ fun MapScreen(
                     columnCount = 2,
                     containerHorizontalPadding = 8.dp
                 ) {
-                    dummyCategories.forEach {
+                    viewModel.emTypes.forEach {
                         item {
                             Box(
                                 modifier = Modifier.padding(4.dp)
                             ) {
-                                CategoryCard(
-                                    onClick = { /*TODO*/ },
+                                EmergencyTypeCard(
+                                    onClick = {
+                                        if (viewModel.pickedEmTypeId.value != it.emTypeId) {
+                                            viewModel.pickedEmTypeId.value = it.emTypeId
+                                        } else viewModel.pickedEmTypeId.value = ""
+                                    },
                                     type = CategoryCardType.SMALL,
+                                    id = it.emTypeId,
+                                    pickedId = viewModel.pickedEmTypeId.value,
                                     word = it.word
                                 )
                             }

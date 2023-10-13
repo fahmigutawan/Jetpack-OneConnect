@@ -16,49 +16,42 @@ val Typography = Typography(
         lineHeight = 64.sp,
         fontFamily = FontFamily(Font(R.font.nunito)),
         fontWeight = FontWeight(400),
-        color = Color(0xFF000000),
     ),
     displayMedium = TextStyle(
         fontSize = 45.sp,
         lineHeight = 52.sp,
         fontFamily = FontFamily(Font(R.font.nunito)),
         fontWeight = FontWeight(400),
-        color = Color(0xFF000000),
     ),
     displaySmall = TextStyle(
         fontSize = 36.sp,
         lineHeight = 44.sp,
         fontFamily = FontFamily(Font(R.font.nunito)),
         fontWeight = FontWeight(400),
-        color = Color(0xFF000000),
     ),
     headlineLarge = TextStyle(
         fontSize = 32.sp,
         lineHeight = 40.sp,
         fontFamily = FontFamily(Font(R.font.nunito)),
         fontWeight = FontWeight(400),
-        color = Color(0xFF000000),
     ),
     headlineMedium = TextStyle(
         fontSize = 24.sp,
         lineHeight = 32.sp,
         fontFamily = FontFamily(Font(R.font.nunito)),
         fontWeight = FontWeight(700),
-        color = Color(0xFF000000),
     ),
     headlineSmall = TextStyle(
         fontSize = 20.sp,
         lineHeight = 28.sp,
         fontFamily = FontFamily(Font(R.font.nunito)),
         fontWeight = FontWeight(700),
-        color = Color(0xFF000000),
     ),
     titleLarge = TextStyle(
         fontSize = 18.sp,
         lineHeight = 22.sp,
         fontFamily = FontFamily(Font(R.font.nunito)),
-        fontWeight = FontWeight(600),
-        color = Color(0xFF000000),
+        fontWeight = FontWeight(600)
     ),
     titleMedium = TextStyle(
         fontSize = 16.sp,
@@ -66,14 +59,12 @@ val Typography = Typography(
         fontFamily = FontFamily(Font(R.font.nunito)),
         fontWeight = FontWeight(700),
         color = Color(0xFF000000),
-        letterSpacing = 0.15.sp,
     ),
     titleSmall = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         fontFamily = FontFamily(Font(R.font.nunito)),
         fontWeight = FontWeight(500),
-        color = Color(0xFF000000),
         letterSpacing = 0.1.sp,
     ),
     bodyLarge = TextStyle(
@@ -81,7 +72,6 @@ val Typography = Typography(
         lineHeight = 20.sp,
         fontFamily = FontFamily(Font(R.font.nunito)),
         fontWeight = FontWeight(500),
-        color = Color(0xFF000000),
         letterSpacing = 0.1.sp,
     ),
     bodyMedium = TextStyle(
@@ -89,7 +79,6 @@ val Typography = Typography(
         lineHeight = 20.sp,
         fontFamily = FontFamily(Font(R.font.nunito)),
         fontWeight = FontWeight(500),
-        color = Color(0xFF000000),
         letterSpacing = 0.5.sp,
     ),
     bodySmall = TextStyle(
@@ -97,7 +86,6 @@ val Typography = Typography(
         lineHeight = 16.sp,
         fontFamily = FontFamily(Font(R.font.nunito)),
         fontWeight = FontWeight(500),
-        color = Color(0xFF000000),
         letterSpacing = 0.5.sp,
     ),
     labelLarge = TextStyle(
@@ -105,7 +93,6 @@ val Typography = Typography(
         lineHeight = 24.sp,
         fontFamily = FontFamily(Font(R.font.nunito)),
         fontWeight = FontWeight(500),
-        color = Color(0xFF000000),
         letterSpacing = 0.2.sp,
     ),
     labelMedium = TextStyle(
@@ -113,7 +100,6 @@ val Typography = Typography(
         lineHeight = 20.sp,
         fontFamily = FontFamily(Font(R.font.nunito)),
         fontWeight = FontWeight(500),
-        color = Color(0xFF000000),
         letterSpacing = 0.1.sp,
     ),
     labelSmall = TextStyle(
@@ -121,6 +107,5 @@ val Typography = Typography(
         lineHeight = 16.sp,
         fontFamily = FontFamily(Font(R.font.nunito)),
         fontWeight = FontWeight(400),
-        color = Color(0xFF000000),
     )
 )

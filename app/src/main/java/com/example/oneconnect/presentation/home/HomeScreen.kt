@@ -3,18 +3,14 @@ package com.example.oneconnect.presentation.home
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -22,7 +18,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.example.oneconnect.global_component.CategoryCard
+import com.example.oneconnect.global_component.EmergencyTypeCard
 import com.example.oneconnect.global_component.CategoryCardType
 import com.example.oneconnect.global_component.ContactInfoCard
 import com.example.oneconnect.global_component.LastCallCard
@@ -30,10 +26,10 @@ import com.example.oneconnect.global_component.NonLazyVerticalGrid
 import com.example.oneconnect.helper.SnackbarHandler
 import com.example.oneconnect.mainViewModel
 import com.example.oneconnect.model.domain.general.PhoneNumberDomain
-import com.example.oneconnect.model.domain.home.HomeCategoryDomain
 import com.example.oneconnect.model.domain.home.HomeFavoriteNumberDomain
 import com.example.oneconnect.model.domain.home.HomeLastCallDomain
 import com.example.oneconnect.model.domain.home.HomeUserDomain
+import com.example.oneconnect.navhost.NavRoutes
 import com.example.oneconnect.presentation.home.component.HomeProfileSection
 import kotlin.system.exitProcess
 
@@ -63,11 +59,11 @@ fun HomeScreen(
             location = "Nganjuk",
             numbers = listOf(
                 PhoneNumberDomain(
-                    phoneNumber = "+62841513413",
+                    phoneNumber = "+6284151341345",
                     contactType = "wa"
                 ),
                 PhoneNumberDomain(
-                    phoneNumber = "+628645746",
+                    phoneNumber = "+6286457465445",
                     contactType = "reg"
                 )
             )
@@ -78,11 +74,11 @@ fun HomeScreen(
             location = "Nganjuk",
             numbers = listOf(
                 PhoneNumberDomain(
-                    phoneNumber = "+62898978657",
+                    phoneNumber = "+62898978657345",
                     contactType = "wa"
                 ),
                 PhoneNumberDomain(
-                    phoneNumber = "+628156353345",
+                    phoneNumber = "+62815635334534",
                     contactType = "reg"
                 )
             )
@@ -93,24 +89,6 @@ fun HomeScreen(
         name = "RS Permata Indah",
         location = "Dinoyo, Malang",
         status = "Menunggu Konfirmasi"
-    )
-    val dummyCategories = listOf(
-        HomeCategoryDomain(
-            "1",
-            "Ambulans"
-        ),
-        HomeCategoryDomain(
-            "2",
-            "Damkar"
-        ),
-        HomeCategoryDomain(
-            "3",
-            "SAR"
-        ),
-        HomeCategoryDomain(
-            "4",
-            "Polisi"
-        )
     )
     val dummyProfile = HomeUserDomain(
         name = "Fahmi Noordin Rumagutawan",
@@ -162,14 +140,17 @@ fun HomeScreen(
                 columnCount = 2,
                 verticalSpacing = 4.dp
             ) {
-                dummyCategories.forEach {
+                viewModel.emTypes.forEach {
                     item {
-                        CategoryCard(
+                        EmergencyTypeCard(
                             modifier = Modifier.padding(4.dp),
                             type = CategoryCardType.BIG,
+                            id = it.emTypeId,
                             word = it.word,
                             onClick = {
-
+                                navController.navigate(
+                                    "${NavRoutes.MAP.name}/${it.emTypeId}"
+                                )
                             }
                         )
                     }
@@ -185,9 +166,10 @@ fun HomeScreen(
                 name = item.name,
                 phoneNumber = item.numbers,
                 onCallClicked = { type, number ->
-                    when(type){
+                    when (type) {
                         "wa" -> {
-                            val numFix = "https://api.whatsapp.com/send?phone=${number.replace("+", "") }}"
+                            val numFix =
+                                "https://api.whatsapp.com/send?phone=${number.replace("+", "")}}"
                             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(numFix))
                             context.startActivity(intent)
                         }

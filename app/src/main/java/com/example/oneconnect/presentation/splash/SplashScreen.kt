@@ -31,8 +31,8 @@ fun SplashScreen(navController: NavController) {
                 }
             }
         },
-        onUserDataInputStatusCheck = {
-            when(it){
+        onUserDataInputStatusCheck = { phoneNumber, status ->
+            when(status){
                 UserDataInputStatus.INPUTTED -> {
                     navController.navigate(NavRoutes.BERANDA.name) {
                         popUpTo(navController.graph.id) {
@@ -41,7 +41,11 @@ fun SplashScreen(navController: NavController) {
                     }
                 }
                 UserDataInputStatus.HAVE_NOT_INPUTTED -> {
-                    //TODO
+                    navController.navigate("${NavRoutes.USER_DATA_INPUT.name}/$phoneNumber") {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
+                    }
                 }
             }
         }
