@@ -63,6 +63,7 @@ import com.example.oneconnect.global_component.SingleContactItem
 import com.example.oneconnect.helper.EmergencyTypeIcon
 import com.example.oneconnect.helper.SnackbarHandler
 import com.example.oneconnect.mainViewModel
+import com.example.oneconnect.presentation.map.component.FavoriteButton
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -237,33 +238,43 @@ fun MapScreen(
                     .padding(bottom = 32.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                Column(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    horizontalAlignment = Alignment.End
                 ) {
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = viewModel.pickedEmergencyProvider.value?.name ?: "...",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.Black,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                    FavoriteButton(
+                        onClick = {},
+                        isFavorite = false
                     )
 
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = viewModel
-                            .pickedEmergencyProviderLocation
-                            .value
-                            ?.features
-                            ?.get(0)
-                            ?.properties?.place_formatted ?: "...",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = viewModel.pickedEmergencyProvider.value?.name ?: "...",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = Color.Black,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = viewModel
+                                .pickedEmergencyProviderLocation
+                                .value
+                                ?.features
+                                ?.get(0)
+                                ?.properties?.place_formatted ?: "...",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
 
                 viewModel.emPhoneNumbers.forEach { phoneNumber ->
@@ -277,7 +288,12 @@ fun MapScreen(
                             when (type) {
                                 "wa" -> {
                                     val numFix =
-                                        "https://api.whatsapp.com/send?phone=${number.replace("+", "")}}"
+                                        "https://api.whatsapp.com/send?phone=${
+                                            number.replace(
+                                                "+",
+                                                ""
+                                            )
+                                        }}"
                                     val callIntent = Intent(Intent.ACTION_VIEW, Uri.parse(numFix))
                                     context.startActivity(callIntent)
                                 }

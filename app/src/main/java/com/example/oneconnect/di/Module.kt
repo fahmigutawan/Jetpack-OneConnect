@@ -1,7 +1,10 @@
 package com.example.oneconnect.di
 
 import android.content.Context
+import androidx.room.Room
 import com.example.oneconnect.data.Repository
+import com.example.oneconnect.data.room.RoomConverters
+import com.example.oneconnect.data.room.RoomDb
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
@@ -35,17 +38,27 @@ object Module {
 
     @Provides
     @Singleton
-    fun provideHttpClient() = HttpClient(Android){
-        install(ContentNegotiation){
+    fun provideHttpClient() = HttpClient(Android) {
+        install(ContentNegotiation) {
             gson()
         }
 
-        install(HttpTimeout){
+        install(HttpTimeout) {
             requestTimeoutMillis = 10000
         }
 
         install(Logging)
     }
+
+    @Provides
+    @Singleton
+    fun provideRoomDb(
+        @ApplicationContext context: Context
+    ) = Room.databaseBuilder(
+        context = context,
+        klass = RoomDb::class.java,
+        name = "one-connect-db"
+    ).addTypeConverter(RoomConverters()).build()
 
     @Provides
     @Singleton

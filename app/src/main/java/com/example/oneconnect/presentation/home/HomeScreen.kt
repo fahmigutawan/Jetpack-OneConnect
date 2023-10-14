@@ -91,7 +91,7 @@ fun HomeScreen(
         status = "Menunggu Konfirmasi"
     )
     val dummyProfile = HomeUserDomain(
-        name = "Fahmi Noordin Rumagutawan ASLDKJLAJWLEJKAWD",
+        name = "Fahmi Noordin Rumagutawan",
         address = "Jl. Kalpataru"
     )
 
