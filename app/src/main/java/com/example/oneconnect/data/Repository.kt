@@ -1,7 +1,9 @@
 package com.example.oneconnect.data
 
 import android.content.Context
+import com.example.oneconnect.data.room.RoomDb
 import com.example.oneconnect.helper.UserDataInputStatus
+import com.example.oneconnect.model.entity.FavoriteItemEntity
 import com.example.oneconnect.model.external.MapboxGeocodingResponse
 import com.example.oneconnect.model.struct.ContactModel
 import com.example.oneconnect.model.struct.EmergencyProviderModel
@@ -26,7 +28,8 @@ class Repository @Inject constructor(
     private val auth: FirebaseAuth,
     private val realtimeDb: FirebaseDatabase,
     private val firestore: FirebaseFirestore,
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val roomDb: RoomDb
 ) {
     fun sendOtp(options: (auth: FirebaseAuth) -> PhoneAuthOptions) {
         PhoneAuthProvider.verifyPhoneNumber(options(auth))
@@ -210,7 +213,7 @@ class Repository @Inject constructor(
     suspend fun getLocationByLongLat(
         longitude: Double,
         latitude: Double,
-        onSuccess:(MapboxGeocodingResponse) -> Unit,
+        onSuccess: (MapboxGeocodingResponse) -> Unit,
         onFailed: (Exception) -> Unit
     ) {
         val res = httpClient.get(
@@ -221,8 +224,8 @@ class Repository @Inject constructor(
                     "&access_token=sk.eyJ1IjoiZmFobWlndXRhd2FuIiwiYSI6ImNsbmVwdXAxcjBremEyam1uZGthdXhiMmUifQ.LR6usbmqClTCkQTAHFqFuw"
         )
 
-        try{
-            when(res.status){
+        try {
+            when (res.status) {
                 HttpStatusCode.OK -> {
                     onSuccess(res.body())
                 }
@@ -231,22 +234,22 @@ class Repository @Inject constructor(
                     onFailed(java.lang.Exception("Terjadi kesalahan"))
                 }
             }
-        }catch (e:Exception){
+        } catch (e: Exception) {
             onFailed(e)
         }
     }
 
     fun getContactByProviderId(
-        emPvdId:String,
+        emPvdId: String,
         onSuccess: (List<ContactModel>) -> Unit,
         onFailed: (Exception) -> Unit
-    ){
+    ) {
         firestore
             .collection("contact")
             .whereEqualTo("em_pvd_id", emPvdId)
             .orderBy("contact_type")
             .addSnapshotListener { value, error ->
-                if(error != null){
+                if (error != null) {
                     onFailed(error)
                     return@addSnapshotListener
                 }
@@ -266,6 +269,13 @@ class Repository @Inject constructor(
                 }
             }
     }
+
+    fun insertNewFavoriteItem(item: FavoriteItemEntity) =
+        roomDb.favoriteItemDao().insertNewFavorite(item)
+
+    fun deleteFavoriteItem(item: FavoriteItemEntity) = roomDb.favoriteItemDao().deleteFavorite(item)
+
+    fun getAllFavoriteItem() = roomDb.favoriteItemDao().getAllFavoriteItem()
 
     fun logout() {
         auth.signOut()

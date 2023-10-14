@@ -25,7 +25,7 @@ fun FavoriteButton(
     isFavorite:Boolean
 ) {
     ElevatedButton(
-        onClick = { /*TODO*/ },
+        onClick = onClick,
         contentPadding = PaddingValues(horizontal = 12.dp),
         colors = ButtonDefaults.elevatedButtonColors(
             containerColor = if(isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer,

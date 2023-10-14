@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
+import android.util.Log
 import android.view.LayoutInflater
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
@@ -63,6 +64,8 @@ import com.example.oneconnect.global_component.SingleContactItem
 import com.example.oneconnect.helper.EmergencyTypeIcon
 import com.example.oneconnect.helper.SnackbarHandler
 import com.example.oneconnect.mainViewModel
+import com.example.oneconnect.model.entity.FavoriteItemEntity
+import com.example.oneconnect.model.entity.FavoriteItemPhoneNumbers
 import com.example.oneconnect.presentation.map.component.FavoriteButton
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -229,6 +232,7 @@ fun MapScreen(
         ModalBottomSheet(
             onDismissRequest = {
                 viewModel.pickedEmergencyProvider.value = null
+                viewModel.isFavorite.value = false
             }
         ) {
             Column(
@@ -243,8 +247,28 @@ fun MapScreen(
                     horizontalAlignment = Alignment.End
                 ) {
                     FavoriteButton(
-                        onClick = {},
-                        isFavorite = false
+                        onClick = {
+                            viewModel.isFavorite.value?.let { favorite ->
+                                val favoriteItem = FavoriteItemEntity(
+                                    em_pvd_id = viewModel.pickedEmergencyProvider.value?.em_pvd_id ?: "",
+                                    em_pvd_name = viewModel.pickedEmergencyProvider.value?.name ?: "",
+                                    location = viewModel.pickedEmergencyProviderLocation.value?.features?.get(0)?.properties?.place_formatted
+                                        ?: "Error when Saved",
+                                    numbers = FavoriteItemPhoneNumbers(
+                                        data = viewModel.emPhoneNumbers.toList()
+                                    )
+                                )
+
+                                if(favorite){
+                                    viewModel.deleteFavoriteItem(favoriteItem)
+                                    viewModel.isFavorite.value = false
+                                }else{
+                                    viewModel.insertNewFavoriteItem(favoriteItem)
+                                    viewModel.isFavorite.value = true
+                                }
+                            }
+                        },
+                        isFavorite = viewModel.isFavorite.value ?: false
                     )
 
                     Row(
@@ -463,6 +487,10 @@ fun MapScreen(
     LaunchedEffect(key1 = viewModel.pickedEmergencyProvider.value) {
         viewModel.pickedEmergencyProvider.value?.let { provider ->
             viewModel.getContactByProviderId(provider.em_pvd_id)
+
+            viewModel.isFavorite.value = viewModel.getAllFavoriteItem().any {
+                it.em_pvd_id == provider.em_pvd_id
+            }
         }
     }
 

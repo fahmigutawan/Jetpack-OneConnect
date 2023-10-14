@@ -58,7 +58,7 @@ object Module {
         context = context,
         klass = RoomDb::class.java,
         name = "one-connect-db"
-    ).addTypeConverter(RoomConverters()).build()
+    ).allowMainThreadQueries().addTypeConverter(RoomConverters()).build()
 
     @Provides
     @Singleton
@@ -67,12 +67,14 @@ object Module {
         auth: FirebaseAuth,
         realtimeDb: FirebaseDatabase,
         firestore: FirebaseFirestore,
-        httpClient: HttpClient
+        httpClient: HttpClient,
+        roomDb: RoomDb
     ) = Repository(
         context = context,
         auth = auth,
         realtimeDb = realtimeDb,
         firestore = firestore,
-        httpClient = httpClient
+        httpClient = httpClient,
+        roomDb = roomDb
     )
 }

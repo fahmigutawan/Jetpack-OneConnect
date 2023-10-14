@@ -10,6 +10,7 @@ import com.example.oneconnect.model.domain.general.PhoneNumberDomain
 import com.example.oneconnect.model.domain.home.HomeEmergencyTypeDomain
 import com.example.oneconnect.model.domain.map.MapEmergencyProviderDomain
 import com.example.oneconnect.model.domain.map.MapEmergencyTypeDomain
+import com.example.oneconnect.model.entity.FavoriteItemEntity
 import com.example.oneconnect.model.external.MapboxGeocodingResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -35,6 +36,8 @@ class MapViewModel @Inject constructor(
     val pickedEmergencyProvider = mutableStateOf<MapEmergencyProviderDomain?>(null)
     val pickedEmergencyProviderLocation = mutableStateOf<MapboxGeocodingResponse?>(null)
     val pickedEmTypeId = mutableStateOf("")
+
+    val isFavorite = mutableStateOf<Boolean?>(null)
 
     fun getAllEmergencyProvider() {
         repository.getAllEmergencyProvider(
@@ -119,6 +122,12 @@ class MapViewModel @Inject constructor(
             )
         }
     }
+
+    fun insertNewFavoriteItem(item: FavoriteItemEntity) = repository.insertNewFavoriteItem(item)
+
+    fun deleteFavoriteItem(item: FavoriteItemEntity) = repository.deleteFavoriteItem(item)
+
+    fun getAllFavoriteItem() = repository.getAllFavoriteItem()
 
     init {
         repository.getAllEmergencyType(
