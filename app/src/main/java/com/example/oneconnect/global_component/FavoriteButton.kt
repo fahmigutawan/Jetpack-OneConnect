@@ -1,4 +1,4 @@
-package com.example.oneconnect.presentation.map.component
+package com.example.oneconnect.global_component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues

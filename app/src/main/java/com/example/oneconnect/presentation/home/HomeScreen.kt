@@ -2,8 +2,12 @@ package com.example.oneconnect.presentation.home
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Space
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,6 +19,8 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -37,53 +43,6 @@ import kotlin.system.exitProcess
 fun HomeScreen(
     navController: NavController
 ) {
-    val dummyFavoriteNumber = listOf(
-        HomeFavoriteNumberDomain(
-            id = "",
-            name = "RS Bhayangkara",
-            location = "Nganjuk",
-            numbers = listOf(
-                PhoneNumberDomain(
-                    phoneNumber = "+6281553993193",
-                    contactType = "wa"
-                ),
-                PhoneNumberDomain(
-                    phoneNumber = "+6281234323313",
-                    contactType = "reg"
-                )
-            )
-        ),
-        HomeFavoriteNumberDomain(
-            id = "",
-            name = "RS Bhayangkara",
-            location = "Nganjuk",
-            numbers = listOf(
-                PhoneNumberDomain(
-                    phoneNumber = "+6284151341345",
-                    contactType = "wa"
-                ),
-                PhoneNumberDomain(
-                    phoneNumber = "+6286457465445",
-                    contactType = "reg"
-                )
-            )
-        ),
-        HomeFavoriteNumberDomain(
-            id = "",
-            name = "RS Bhayangkara",
-            location = "Nganjuk",
-            numbers = listOf(
-                PhoneNumberDomain(
-                    phoneNumber = "+62898978657345",
-                    contactType = "wa"
-                ),
-                PhoneNumberDomain(
-                    phoneNumber = "+62815635334534",
-                    contactType = "reg"
-                )
-            )
-        )
-    )
     val dummyLastCall = HomeLastCallDomain(
         id = "123",
         name = "RS Permata Indah",
@@ -160,11 +119,20 @@ fun HomeScreen(
         item {
             Text(text = "Nomor Favorit", style = MaterialTheme.typography.headlineSmall)
         }
-        items(dummyFavoriteNumber) { item ->
+        if (viewModel.favoritePhoneProviders.isEmpty()) {
+            item {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Belum Ada Nomor Favorit",
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+        items(viewModel.favoritePhoneProviders) { item ->
             ContactInfoCard(
-                location = item.location,
-                name = item.name,
-                phoneNumber = item.numbers,
+                location = item.location ?: "",
+                name = item.em_pvd_name ?: "",
+                phoneNumber = item.numbers.data,
                 onCallClicked = { type, number ->
                     when (type) {
                         "wa" -> {
@@ -186,8 +154,16 @@ fun HomeScreen(
                     viewModel.copiedNumber.value = it
                     SnackbarHandler.showSnackbar("Nomor telah di-copy")
                 },
-                copiedNumber = viewModel.copiedNumber.value
+                copiedNumber = viewModel.copiedNumber.value,
+                onDeleteClick = {
+                    viewModel.deleteFavoriteItem(item)
+                    viewModel.favoritePhoneProviders.remove(item)
+                    SnackbarHandler.showSnackbar("Berhasil dihapus dari favorit")
+                }
             )
+        }
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

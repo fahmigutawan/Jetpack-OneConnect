@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
-import android.util.Log
 import android.view.LayoutInflater
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
@@ -66,7 +65,7 @@ import com.example.oneconnect.helper.SnackbarHandler
 import com.example.oneconnect.mainViewModel
 import com.example.oneconnect.model.entity.FavoriteItemEntity
 import com.example.oneconnect.model.entity.FavoriteItemPhoneNumbers
-import com.example.oneconnect.presentation.map.component.FavoriteButton
+import com.example.oneconnect.global_component.FavoriteButton
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
