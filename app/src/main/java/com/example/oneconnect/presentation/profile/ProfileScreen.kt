@@ -1,9 +1,6 @@
 package com.example.oneconnect.presentation.profile
 
-import android.annotation.SuppressLint
-import android.provider.ContactsContract.Profile
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,7 +34,6 @@ import com.example.oneconnect.mainViewModel
 import com.example.oneconnect.navhost.NavRoutes
 import com.example.oneconnect.presentation.profile.component.ProfileButtonsSection
 import com.example.oneconnect.presentation.profile.component.ProfileInformationCard
-import com.example.oneconnect.presentation.profile.component.ProfileViewModel
 import kotlin.system.exitProcess
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -59,7 +56,7 @@ fun ProfileScreen(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
-                    Text(text = "Profil")
+                    Text(text = "Profil", style = MaterialTheme.typography.headlineSmall)
                 }
             )
         }
@@ -85,7 +82,7 @@ fun ProfileScreen(
                     contentDescription = ""
                 )
 
-                Text(text = "Fahmi")
+                Text(text = "Fahmi", style = MaterialTheme.typography.headlineSmall)
 
                 Button(onClick = { /*TODO*/ }) {
                     Row(

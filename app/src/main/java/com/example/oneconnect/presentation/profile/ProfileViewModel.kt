@@ -1,4 +1,4 @@
-package com.example.oneconnect.presentation.profile.component
+package com.example.oneconnect.presentation.profile
 
 import androidx.lifecycle.ViewModel
 import com.example.oneconnect.data.Repository
