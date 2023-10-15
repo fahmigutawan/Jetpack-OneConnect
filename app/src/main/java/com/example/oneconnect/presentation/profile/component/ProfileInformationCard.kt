@@ -32,7 +32,9 @@ fun ProfileInformationCard(
             defaultElevation = 8.dp
         )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
             Text(text = "Informasi Pribadi", style = MaterialTheme.typography.headlineSmall)
             Column {
                 Text(text = "Nomor HP", style = MaterialTheme.typography.titleMedium)
