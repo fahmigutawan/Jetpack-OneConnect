@@ -31,6 +31,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -121,6 +122,9 @@ class MainActivity : ComponentActivity() {
             OneConnectTheme {
                 val selectedNavbarItemColor = MaterialTheme.colorScheme.primary
                 val unselectedNavbarItemColor = Color.Gray
+                val bottomBarPadding = remember {
+                    mutableStateOf(0.dp)
+                }
 
                 Scaffold(
                     snackbarHost = {
@@ -128,7 +132,9 @@ class MainActivity : ComponentActivity() {
                             hostState = snackbarHostState,
                             snackbar = {
                                 Snackbar(
-                                    modifier = Modifier.padding(32.dp),
+                                    modifier = Modifier
+                                        .padding(16.dp)
+                                        .padding(bottom = bottomBarPadding.value),
                                     shape = RoundedCornerShape(16.dp),
                                     action = {
                                         it.visuals.actionLabel?.let { it1 ->
@@ -147,6 +153,8 @@ class MainActivity : ComponentActivity() {
                         )
                     },
                 ) {
+                    bottomBarPadding.value = it.calculateBottomPadding()
+
                     Scaffold(
                         bottomBar = {
                             if (mainViewModel.showBottomBar.value) {

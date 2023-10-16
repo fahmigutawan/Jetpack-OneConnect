@@ -35,6 +35,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -110,6 +112,13 @@ fun MapScreen(
     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     val myLocationIcon = remember {
         mutableStateOf(Icons.Default.GpsFixed)
+    }
+    val isFavorite = remember {
+        derivedStateOf {
+            viewModel.favoriteItems.any {
+                it.em_pvd_id == (viewModel.pickedEmergencyProvider.value?.em_pvd_id ?: "")
+            }
+        }
     }
     val onMoveListener = object : OnMoveListener {
         override fun onMove(detector: MoveGestureDetector): Boolean {
@@ -231,7 +240,6 @@ fun MapScreen(
         ModalBottomSheet(
             onDismissRequest = {
                 viewModel.pickedEmergencyProvider.value = null
-                viewModel.isFavorite.value = false
             }
         ) {
             Column(
@@ -247,27 +255,31 @@ fun MapScreen(
                 ) {
                     FavoriteButton(
                         onClick = {
-                            viewModel.isFavorite.value?.let { favorite ->
-                                val favoriteItem = FavoriteItemEntity(
-                                    em_pvd_id = viewModel.pickedEmergencyProvider.value?.em_pvd_id ?: "",
-                                    em_pvd_name = viewModel.pickedEmergencyProvider.value?.name ?: "",
-                                    location = viewModel.pickedEmergencyProviderLocation.value?.features?.get(0)?.properties?.place_formatted
-                                        ?: "Error when Saved",
-                                    numbers = FavoriteItemPhoneNumbers(
-                                        data = viewModel.emPhoneNumbers.toList()
-                                    )
+                            val favoriteItem = FavoriteItemEntity(
+                                em_pvd_id = viewModel.pickedEmergencyProvider.value?.em_pvd_id
+                                    ?: "",
+                                em_pvd_name = viewModel.pickedEmergencyProvider.value?.name ?: "",
+                                location = viewModel.pickedEmergencyProviderLocation.value?.features?.get(
+                                    0
+                                )?.properties?.place_formatted
+                                    ?: "Error when Saved",
+                                numbers = FavoriteItemPhoneNumbers(
+                                    data = viewModel.emPhoneNumbers.toList()
                                 )
+                            )
 
-                                if(favorite){
-                                    viewModel.deleteFavoriteItem(favoriteItem)
-                                    viewModel.isFavorite.value = false
-                                }else{
-                                    viewModel.insertNewFavoriteItem(favoriteItem)
-                                    viewModel.isFavorite.value = true
+                            if (isFavorite.value) {
+                                viewModel.deleteFavoriteItem(favoriteItem)
+                                viewModel.favoriteItems.removeIf {
+                                    it.em_pvd_id == (viewModel.pickedEmergencyProvider.value?.em_pvd_id
+                                        ?: "")
                                 }
+                            } else {
+                                viewModel.insertNewFavoriteItem(favoriteItem)
+                                viewModel.favoriteItems.add(favoriteItem)
                             }
                         },
-                        isFavorite = viewModel.isFavorite.value ?: false
+                        isFavorite = isFavorite.value
                     )
 
                     Row(
@@ -438,19 +450,6 @@ fun MapScreen(
                             .clickable {
                                 viewModel.pickedEmergencyProvider.value = domain
 
-                                it.camera.flyTo(
-                                    CameraOptions
-                                        .Builder()
-                                        .center(
-                                            Point.fromLngLat(
-                                                domain.longitude,
-                                                domain.latitude
-                                            )
-                                        )
-                                        .zoom(16.0)
-                                        .build()
-                                )
-
                                 viewModel.getLocationByLongLat(
                                     domain.longitude,
                                     domain.latitude
@@ -459,6 +458,7 @@ fun MapScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
+                            modifier = Modifier.size(24.dp),
                             painter = rememberAsyncImagePainter(
                                 model = EmergencyTypeIcon.getIconId(
                                     domain.em_type
@@ -486,15 +486,13 @@ fun MapScreen(
     LaunchedEffect(key1 = viewModel.pickedEmergencyProvider.value) {
         viewModel.pickedEmergencyProvider.value?.let { provider ->
             viewModel.getContactByProviderId(provider.em_pvd_id)
-
-            viewModel.isFavorite.value = viewModel.getAllFavoriteItem().any {
-                it.em_pvd_id == provider.em_pvd_id
-            }
         }
     }
 
     LaunchedEffect(key1 = true) {
         viewModel.pickedEmTypeId.value = emTypeId
+
+        viewModel.getFavoriteItems()
     }
 
     BackHandler {

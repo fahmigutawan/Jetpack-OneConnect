@@ -58,7 +58,7 @@ object Module {
         context = context,
         klass = RoomDb::class.java,
         name = "one-connect-db"
-    ).addTypeConverter(RoomConverters()).build()
+    ).addTypeConverter(RoomConverters()).allowMainThreadQueries().build()
 
     @Provides
     @Singleton

@@ -1,21 +1,28 @@
 package com.example.oneconnect.presentation.map
 
 import android.util.Log
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.oneconnect.data.Repository
 import com.example.oneconnect.model.domain.general.PhoneNumberDomain
-import com.example.oneconnect.model.domain.home.HomeEmergencyTypeDomain
 import com.example.oneconnect.model.domain.map.MapEmergencyProviderDomain
 import com.example.oneconnect.model.domain.map.MapEmergencyTypeDomain
 import com.example.oneconnect.model.entity.FavoriteItemEntity
 import com.example.oneconnect.model.external.MapboxGeocodingResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class MapViewModel @Inject constructor(
     private val repository: Repository
@@ -37,7 +44,7 @@ class MapViewModel @Inject constructor(
     val pickedEmergencyProviderLocation = mutableStateOf<MapboxGeocodingResponse?>(null)
     val pickedEmTypeId = mutableStateOf("")
 
-    val isFavorite = mutableStateOf<Boolean?>(null)
+    val favoriteItems = mutableStateListOf<FavoriteItemEntity>()
 
     fun getAllEmergencyProvider() {
         repository.getAllEmergencyProvider(
@@ -123,11 +130,19 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    fun insertNewFavoriteItem(item: FavoriteItemEntity) = repository.insertNewFavoriteItem(item)
+    fun insertNewFavoriteItem(item: FavoriteItemEntity) =
+        repository.insertNewFavoriteItem(item)
 
-    fun deleteFavoriteItem(item: FavoriteItemEntity) = repository.deleteFavoriteItem(item)
+    fun deleteFavoriteItem(item: FavoriteItemEntity) =
+        repository.deleteFavoriteItem(item)
 
-    fun getAllFavoriteItem() = repository.getAllFavoriteItem()
+    fun getFavoriteItems() = viewModelScope.launch(Dispatchers.IO) {
+        val list = async {
+            repository.getAllFavoriteItem()
+        }
+
+        favoriteItems.addAll(list.await())
+    }
 
     init {
         repository.getAllEmergencyType(

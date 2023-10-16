@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -58,7 +59,10 @@ fun HomeScreen(
     val viewModel = hiltViewModel<HomeViewModel>()
     val clipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
-    val favoritePhoneProviders = viewModel.favoritePhoneProviders.collectAsState()
+
+    LaunchedEffect(key1 = true){
+        viewModel.getAllFavorites()
+    }
 
     BackHandler {
         if (mainViewModel.backClicked.value) {
@@ -121,7 +125,7 @@ fun HomeScreen(
         item {
             Text(text = "Nomor Favorit", style = MaterialTheme.typography.headlineSmall)
         }
-        if (favoritePhoneProviders.value.isEmpty()) {
+        if (viewModel.favoritePhoneProviders.isEmpty()) {
             item {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
@@ -131,7 +135,7 @@ fun HomeScreen(
             }
         }
 
-        items(favoritePhoneProviders.value) { item ->
+        items(viewModel.favoritePhoneProviders) { item ->
             ContactInfoCard(
                 location = item.location ?: "",
                 name = item.em_pvd_name ?: "",
@@ -160,7 +164,9 @@ fun HomeScreen(
                 copiedNumber = viewModel.copiedNumber.value,
                 onDeleteClick = {
                     viewModel.deleteFavoriteItem(item)
-                    viewModel.favoritePhoneProviders.value.remove(item)
+                    viewModel.favoritePhoneProviders.removeIf {
+                        it.em_pvd_id == item.em_pvd_id
+                    }
                     SnackbarHandler.showSnackbar("Berhasil dihapus dari favorit")
                 }
             )
