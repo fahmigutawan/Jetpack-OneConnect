@@ -27,6 +27,7 @@ class HomeViewModel @Inject constructor(
     val copiedNumber = mutableStateOf("")
     val emTypes = mutableStateListOf<HomeEmergencyTypeDomain>()
     val favoritePhoneProviders = mutableStateListOf<FavoriteItemEntity>()
+    val availableTransportCountMaps = mutableStateOf(mapOf<String, Int>())
 
     fun deleteFavoriteItem(item: FavoriteItemEntity) = repository.deleteFavoriteItem(item)
 
@@ -36,6 +37,22 @@ class HomeViewModel @Inject constructor(
         }
 
         favoritePhoneProviders.addAll(list.await())
+    }
+
+    fun getMultipleTransportCount(
+        emPvdIds:List<String>
+    ){
+        repository.getMultipleTransportCount(
+            emPvdIds = emPvdIds,
+            onSuccess = {
+                availableTransportCountMaps.value = it
+                Log.e("ALSKDJLKAS", it.toString())
+            },
+            onFailed = {
+                //TODO
+                Log.e("LASKDJLASK", it.toString())
+            }
+        )
     }
 
     init {

@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -282,22 +283,28 @@ fun MapScreen(
                         isFavorite = isFavorite.value
                     )
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = viewModel.pickedEmergencyProvider.value?.name ?: "...",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = Color.Black,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                modifier = Modifier.weight(1f),
+                                text = viewModel.pickedEmergencyProvider.value?.name ?: "...",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = Color.Black,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
 
+                            Text(
+                                modifier = Modifier.weight(1f),
+                                text = "${viewModel.availableTransportCount.value} Kendaraan Tersedia",
+                                textAlign = TextAlign.End
+                            )
+                        }
                         Text(
-                            modifier = Modifier.weight(1f),
                             text = viewModel
                                 .pickedEmergencyProviderLocation
                                 .value
@@ -340,6 +347,7 @@ fun MapScreen(
                                 }
                             }
                         },
+                        enableCall = viewModel.availableTransportCount.value > 0,
                         copiedNumber = viewModel.copiedNumber.value,
                         phoneNumber = phoneNumber
                     )
@@ -486,6 +494,7 @@ fun MapScreen(
     LaunchedEffect(key1 = viewModel.pickedEmergencyProvider.value) {
         viewModel.pickedEmergencyProvider.value?.let { provider ->
             viewModel.getContactByProviderId(provider.em_pvd_id)
+            viewModel.getSingleTransportCount(provider.em_pvd_id)
         }
     }
 

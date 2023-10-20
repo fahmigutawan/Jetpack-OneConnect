@@ -46,6 +46,8 @@ class MapViewModel @Inject constructor(
 
     val favoriteItems = mutableStateListOf<FavoriteItemEntity>()
 
+    val availableTransportCount = mutableStateOf(0)
+
     fun getAllEmergencyProvider() {
         repository.getAllEmergencyProvider(
             onSuccess = {
@@ -142,6 +144,20 @@ class MapViewModel @Inject constructor(
         }
 
         favoriteItems.addAll(list.await())
+    }
+
+    fun getSingleTransportCount(
+        emPvdId: String
+    ) {
+        repository.getSingleTransportCount(
+            emPvdId = emPvdId,
+            onSuccess = {
+                availableTransportCount.value = it
+            },
+            onFailed = {
+                //TODO
+            }
+        )
     }
 
     init {

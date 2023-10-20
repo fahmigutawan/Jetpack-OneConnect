@@ -15,11 +15,13 @@ import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ServerValue
 import com.google.firebase.firestore.FirebaseFirestore
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
+import java.util.UUID
 import javax.inject.Inject
 
 
@@ -276,6 +278,68 @@ class Repository @Inject constructor(
     fun deleteFavoriteItem(item: FavoriteItemEntity) = roomDb.favoriteItemDao().deleteFavorite(item)
 
     fun getAllFavoriteItem() = roomDb.favoriteItemDao().getAllFavoriteItem()
+
+    fun getMultipleTransportCount(
+        emPvdIds: List<String>,
+        onSuccess: (Map<String, Int>) -> Unit,
+        onFailed: (Exception) -> Unit
+    ) {
+        val mapResult = mutableMapOf<String, Int>()
+        emPvdIds.forEach { pvd_id ->
+            firestore
+                .collection("em_transport")
+                .whereEqualTo("em_pvd_id", pvd_id)
+                .addSnapshotListener { value, error ->
+                    if(error != null){
+                        onFailed(error)
+                    }
+
+                    mapResult[pvd_id] = value?.documents?.filter {
+                        it["is_available"] as Boolean
+                    }?.size ?: 0
+
+                    if (mapResult.size == emPvdIds.size) {
+                        onSuccess(mapResult)
+                    }
+                }
+        }
+    }
+
+    fun getSingleTransportCount(
+        emPvdId: String,
+        onSuccess: (Int) -> Unit,
+        onFailed: (Exception) -> Unit
+    ) {
+        firestore
+            .collection("em_transport")
+            .whereEqualTo("em_pvd_id", emPvdId)
+            .addSnapshotListener { value, error ->
+                if(error != null){
+                    onFailed(error)
+                }
+
+                value?.let {
+                    onSuccess(
+                        value.documents.filter {
+                            it["is_available"] as Boolean
+                        }.size
+                    )
+                }
+            }
+    }
+
+    fun makeCallObjectInRealtimeDb(
+        emPvdId: String,
+        userLong:Double,
+        userLat:Double
+    ){
+        val em_call_id = UUID.randomUUID()
+        val uid = auth.currentUser?.uid ?: ""
+        val em_transport_id = "." //This is default value
+        val transport_long = "." //This is default value
+        val transport_lat = "." //This is default value
+        val call_date = ServerValue.TIMESTAMP
+    }
 
     fun logout() {
         auth.signOut()

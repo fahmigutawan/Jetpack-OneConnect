@@ -25,6 +25,7 @@ import com.example.oneconnect.model.domain.general.PhoneNumberDomain
 fun SingleContactItem(
     onCopyClicked: (String) -> Unit,
     onCallClicked: (type: String, number: String) -> Unit,
+    enableCall:Boolean = true,
     copiedNumber: String,
     phoneNumber: PhoneNumberDomain
 ) {
@@ -75,7 +76,8 @@ fun SingleContactItem(
                         phoneNumber.phoneNumber
                     )
                 },
-                shape = RoundedCornerShape(Int.MAX_VALUE.dp)
+                shape = RoundedCornerShape(Int.MAX_VALUE.dp),
+                enabled = enableCall
             ) {
                 Icon(
                     painter = rememberAsyncImagePainter(model = R.drawable.icon_call),

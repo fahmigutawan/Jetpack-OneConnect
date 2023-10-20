@@ -8,6 +8,8 @@ import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkAdded
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -37,10 +39,10 @@ fun FavoriteButton(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Icon(
-                imageVector = if(isFavorite) Icons.Default.BookmarkAdded else Icons.Default.BookmarkBorder,
+                imageVector = if(isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = ""
             )
-            Text(text = if(isFavorite) "Tersimpan" else "Simpan")
+            Text(text = "Favorit")
         }
     }
 }

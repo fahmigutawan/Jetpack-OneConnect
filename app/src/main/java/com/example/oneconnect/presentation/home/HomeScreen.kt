@@ -2,6 +2,7 @@ package com.example.oneconnect.presentation.home
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.widget.Space
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
@@ -60,8 +61,16 @@ fun HomeScreen(
     val clipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
 
-    LaunchedEffect(key1 = true){
+    LaunchedEffect(key1 = true) {
         viewModel.getAllFavorites()
+    }
+
+    LaunchedEffect(key1 = viewModel.favoritePhoneProviders.toList()) {
+        if(viewModel.favoritePhoneProviders.isNotEmpty()){
+            viewModel.getMultipleTransportCount(
+                viewModel.favoritePhoneProviders.toList().map { it.em_pvd_id }
+            )
+        }
     }
 
     BackHandler {
@@ -168,7 +177,8 @@ fun HomeScreen(
                         it.em_pvd_id == item.em_pvd_id
                     }
                     SnackbarHandler.showSnackbar("Berhasil dihapus dari favorit")
-                }
+                },
+                availableTransportCount = (viewModel.availableTransportCountMaps.value[item.em_pvd_id] ?: 0)
             )
         }
 
