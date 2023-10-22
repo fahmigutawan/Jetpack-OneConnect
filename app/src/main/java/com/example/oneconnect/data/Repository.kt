@@ -5,6 +5,7 @@ import com.example.oneconnect.data.room.RoomDb
 import com.example.oneconnect.helper.UserDataInputStatus
 import com.example.oneconnect.model.entity.FavoriteItemEntity
 import com.example.oneconnect.model.external.MapboxGeocodingResponse
+import com.example.oneconnect.model.struct.CallModel
 import com.example.oneconnect.model.struct.ContactModel
 import com.example.oneconnect.model.struct.EmergencyProviderModel
 import com.example.oneconnect.model.struct.EmergencyTypeModel
@@ -290,7 +291,7 @@ class Repository @Inject constructor(
                 .collection("em_transport")
                 .whereEqualTo("em_pvd_id", pvd_id)
                 .addSnapshotListener { value, error ->
-                    if(error != null){
+                    if (error != null) {
                         onFailed(error)
                     }
 
@@ -314,7 +315,7 @@ class Repository @Inject constructor(
             .collection("em_transport")
             .whereEqualTo("em_pvd_id", emPvdId)
             .addSnapshotListener { value, error ->
-                if(error != null){
+                if (error != null) {
                     onFailed(error)
                 }
 
@@ -330,15 +331,37 @@ class Repository @Inject constructor(
 
     fun makeCallObjectInRealtimeDb(
         emPvdId: String,
-        userLong:Double,
-        userLat:Double
-    ){
-        val em_call_id = UUID.randomUUID()
+        userLong: Double,
+        userLat: Double
+    ) {
+        val em_call_id = UUID.randomUUID().toString()
         val uid = auth.currentUser?.uid ?: ""
+        val phoneNumber = auth.currentUser?.phoneNumber ?: ""
         val em_transport_id = "." //This is default value
         val transport_long = "." //This is default value
         val transport_lat = "." //This is default value
-        val call_date = ServerValue.TIMESTAMP
+        val em_call_status_id = "S6LQDRJKurqtVAmRgBqy" //This is default value
+        val created_at = ServerValue.TIMESTAMP
+
+        val body = CallModel(
+            em_call_id = em_call_id,
+            uid = uid,
+            em_transport_id = em_transport_id,
+            em_pvd_id = emPvdId,
+            user_long = userLong.toString(),
+            user_lat = userLat.toString(),
+            transport_long = transport_long,
+            transport_lat = transport_lat,
+            user_phone_number = phoneNumber,
+            created_at = created_at,
+            em_call_status_id = em_call_status_id
+        )
+
+        realtimeDb
+            .reference
+            .child("em_call")
+            .child(em_call_id)
+            .setValue(body)
     }
 
     fun logout() {

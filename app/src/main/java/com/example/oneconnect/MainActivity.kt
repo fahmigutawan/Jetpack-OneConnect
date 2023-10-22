@@ -2,6 +2,7 @@ package com.example.oneconnect
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -47,6 +48,7 @@ import com.example.oneconnect.helper.SnackbarHandler
 import com.example.oneconnect.navhost.AppNavHost
 import com.example.oneconnect.navhost.NavRoutes
 import com.example.oneconnect.ui.theme.OneConnectTheme
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -63,11 +65,14 @@ lateinit var _showSnackbarWithAction: (
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val _mainViewModel by viewModels<MainViewModel>()
         mainViewModel = _mainViewModel
+
+        FirebaseMessaging.getInstance().token.addOnSuccessListener {
+            Log.e("FCM TOKEN", it)
+        }
 
         setContent {
             val navController = rememberNavController()

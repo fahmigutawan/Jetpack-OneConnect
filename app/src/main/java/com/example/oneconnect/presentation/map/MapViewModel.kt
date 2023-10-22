@@ -95,6 +95,15 @@ class MapViewModel @Inject constructor(
         )
     }
 
+    fun makeCallObjectInRealtimeDb(
+        emPvdId: String,
+        userLong: Double,
+        userLat: Double
+    ) {
+        repository.makeCallObjectInRealtimeDb(
+            emPvdId, userLong, userLat
+        )
+    }
     fun getContactByProviderId(
         emPvdId: String
     ) {

@@ -346,6 +346,12 @@ fun MapScreen(
                                     context.startActivity(callIntent)
                                 }
                             }
+
+                            viewModel.makeCallObjectInRealtimeDb(
+                                viewModel.pickedEmergencyProvider.value?.em_pvd_id ?: "",
+                                viewModel.userLong.value,
+                                viewModel.userLat.value
+                            )
                         },
                         enableCall = viewModel.availableTransportCount.value > 0,
                         copiedNumber = viewModel.copiedNumber.value,
