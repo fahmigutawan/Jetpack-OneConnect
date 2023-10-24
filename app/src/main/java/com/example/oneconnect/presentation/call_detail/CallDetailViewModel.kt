@@ -20,15 +20,17 @@ class CallDetailViewModel @Inject constructor(
     val emProviderTypeMap = mutableMapOf<String, String>()
 
     fun getCallInfoFromId(
-        id:String
+        id:String,
+        onListened:(CallModel) -> Unit,
+        onFailed:(Exception) -> Unit
     ){
         repository.listenEmCallSnapshotById(
             emCallId = id,
             onListened = {
-                call.value = it
+                onListened(it)
             },
             onFailed = {
-                Log.e("ERROR", it.toString())
+                onFailed(it)
             }
         )
     }
