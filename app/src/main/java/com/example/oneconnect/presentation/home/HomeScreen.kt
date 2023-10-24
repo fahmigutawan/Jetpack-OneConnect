@@ -69,6 +69,21 @@ fun HomeScreen(
         }
     }
 
+    LaunchedEffect(key1 = viewModel.lastCall.value){
+        viewModel.lastCall.value?.let {
+            viewModel.getEmergencyProviderById(it.em_pvd_id ?: "")
+        }
+    }
+
+    LaunchedEffect(key1 = viewModel.lastCallEmProvider.value){
+        viewModel.lastCallEmProvider.value?.let {
+            viewModel.getLocationFromLongLat(
+                long = it.longitude?.toDouble() ?: .0,
+                lat = it.latitude?.toDouble() ?: .0
+            )
+        }
+    }
+
     BackHandler {
         if (mainViewModel.backClicked.value) {
             exitProcess(0)
@@ -89,15 +104,19 @@ fun HomeScreen(
                 location = "Jawa Timur, Indonesia"
             )
         }
-        item {
-            Text(text = "Panggilan Terakhir", style = MaterialTheme.typography.headlineSmall)
-        }
-        item {
-            LastCallCard(
-                name = dummyLastCall.name,
-                location = dummyLastCall.location,
-                status = dummyLastCall.status
-            )
+
+        viewModel.lastCall.value?.let {
+            item {
+                Text(text = "Panggilan Terakhir", style = MaterialTheme.typography.headlineSmall)
+            }
+
+            item {
+                LastCallCard(
+                    name = viewModel.lastCallEmProvider.value?.name ?: "",
+                    location = viewModel.lastCallLocationResponse.value?.features?.get(0)?.properties?.place_formatted ?: "",
+                    status = viewModel.callStatusMap[viewModel.lastCall.value?.em_call_status_id ?: ""] ?: "..."
+                )
+            }
         }
         item {
             Text(text = "Layanan Darurat", style = MaterialTheme.typography.headlineSmall)

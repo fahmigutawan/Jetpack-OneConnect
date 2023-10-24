@@ -7,6 +7,7 @@ import com.example.oneconnect.helper.UserDataInputStatus
 import com.example.oneconnect.model.entity.FavoriteItemEntity
 import com.example.oneconnect.model.external.MapboxGeocodingResponse
 import com.example.oneconnect.model.struct.CallModel
+import com.example.oneconnect.model.struct.CallStatusModel
 import com.example.oneconnect.model.struct.ContactModel
 import com.example.oneconnect.model.struct.EmergencyProviderModel
 import com.example.oneconnect.model.struct.EmergencyTypeModel
@@ -218,6 +219,35 @@ class Repository @Inject constructor(
             }
     }
 
+    fun getEmergencyProviderById(
+        emPvdId: String,
+        onSuccess: (EmergencyProviderModel) -> Unit,
+        onFailed: (Exception) -> Unit
+    ) {
+        firestore
+            .collection("em_srv_provider")
+            .document(emPvdId)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    onFailed(error)
+                    return@addSnapshotListener
+                }
+
+                value?.let { doc ->
+                    onSuccess(
+                        EmergencyProviderModel(
+                            em_pvd_id = doc["em_pvd_id"] as String,
+                            longitude = doc["longitude"] as String,
+                            latitude = doc["latitude"] as String,
+                            name = doc["name"] as String,
+                            em_type = doc["em_type"] as String
+                        )
+                    )
+                    return@addSnapshotListener
+                }
+            }
+    }
+
     suspend fun getLocationByLongLat(
         longitude: Double,
         latitude: Double,
@@ -335,15 +365,15 @@ class Repository @Inject constructor(
     }
 
     fun getUserInfo(
-        uid:String = auth.currentUser?.uid ?: "",
-        onSuccess:(UserModel) -> Unit,
+        uid: String = auth.currentUser?.uid ?: "",
+        onSuccess: (UserModel) -> Unit,
         onFailed: (Exception) -> Unit
-    ){
+    ) {
         firestore
             .collection("user")
             .document(uid)
             .addSnapshotListener { value, error ->
-                if(error != null){
+                if (error != null) {
                     onFailed(error)
                     return@addSnapshotListener
                 }
@@ -399,10 +429,10 @@ class Repository @Inject constructor(
     }
 
     fun listenEmCallSnapshot(
-        uid:String = auth.currentUser?.uid ?: "",
-        onSuccess:() -> Unit,
+        uid: String = auth.currentUser?.uid ?: "",
+        onListened: (List<CallModel>) -> Unit,
         onFailed: (Exception) -> Unit
-    ){
+    ) {
         realtimeDb
             .reference
             .child("em_call")
@@ -414,13 +444,55 @@ class Repository @Inject constructor(
                         val sorted = snapshot.children.sortedBy {
                             it.child("created_at").value as Long
                         }
+
+                        onListened(
+                            sorted.map {
+                                CallModel(
+                                    em_call_id = it.child("em_call_id").value as String,
+                                    uid = it.child("uid").value as String,
+                                    em_transport_id = it.child("em_transport_id").value as String,
+                                    em_pvd_id = it.child("em_pvd_id").value as String,
+                                    user_long = it.child("user_long").value as String,
+                                    user_lat = it.child("user_lat").value as String,
+                                    transport_long = it.child("transport_long").value as String,
+                                    transport_lat = it.child("transport_lat").value as String,
+                                    user_phone_number = it.child("user_phone_number").value as String,
+                                    em_call_status_id = it.child("em_call_status_id").value as String,
+                                )
+                            }
+                        )
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-
+                        onFailed(error.toException())
                     }
                 }
             )
+    }
+
+    fun getAllCallStatus(
+        onSuccess: (List<CallStatusModel>) -> Unit,
+        onFailed: (Exception) -> Unit
+    ){
+        firestore
+            .collection("em_call_status")
+            .addSnapshotListener { value, error ->
+                error?.let {
+                    onFailed(it)
+                    return@addSnapshotListener
+                }
+
+                value?.let {
+                    onSuccess(
+                        it.documents.map {
+                            CallStatusModel(
+                                em_call_status_id = it["em_call_status_id"] as String,
+                                word = it["word"] as String
+                            )
+                        }
+                    )
+                }
+            }
     }
 
     fun logout() {

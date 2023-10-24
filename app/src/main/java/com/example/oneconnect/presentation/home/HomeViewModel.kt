@@ -11,6 +11,9 @@ import com.example.oneconnect.model.domain.general.PhoneNumberDomain
 import com.example.oneconnect.model.domain.home.HomeEmergencyTypeDomain
 import com.example.oneconnect.model.domain.home.HomeFavoriteNumberDomain
 import com.example.oneconnect.model.entity.FavoriteItemEntity
+import com.example.oneconnect.model.external.MapboxGeocodingResponse
+import com.example.oneconnect.model.struct.CallModel
+import com.example.oneconnect.model.struct.EmergencyProviderModel
 import com.example.oneconnect.model.struct.UserModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -30,6 +33,10 @@ class HomeViewModel @Inject constructor(
     val favoritePhoneProviders = mutableStateListOf<FavoriteItemEntity>()
     val availableTransportCountMaps = mutableStateOf(mapOf<String, Int>())
     val userInfo = mutableStateOf<UserModel?>(null)
+    val lastCall = mutableStateOf<CallModel?>(null)
+    val lastCallEmProvider = mutableStateOf<EmergencyProviderModel?>(null)
+    val lastCallLocationResponse = mutableStateOf<MapboxGeocodingResponse?>(null)
+    val callStatusMap = mutableMapOf<String, String>()
 
     fun deleteFavoriteItem(item: FavoriteItemEntity) = repository.deleteFavoriteItem(item)
 
@@ -42,19 +49,49 @@ class HomeViewModel @Inject constructor(
     }
 
     fun getMultipleTransportCount(
-        emPvdIds:List<String>
-    ){
+        emPvdIds: List<String>
+    ) {
         repository.getMultipleTransportCount(
             emPvdIds = emPvdIds,
             onSuccess = {
                 availableTransportCountMaps.value = it
-                Log.e("ALSKDJLKAS", it.toString())
             },
             onFailed = {
-                //TODO
-                Log.e("LASKDJLASK", it.toString())
+                Log.e("ERROR", it.toString())
             }
         )
+    }
+
+    fun getEmergencyProviderById(
+        emPvdId: String
+    ) {
+        repository.getEmergencyProviderById(
+            emPvdId = emPvdId,
+            onSuccess = {
+                lastCallEmProvider.value = it
+            },
+            onFailed = {
+                Log.e("ERROR", it.toString())
+            }
+        )
+    }
+
+    fun getLocationFromLongLat(
+        long: Double,
+        lat: Double
+    ) {
+        viewModelScope.launch {
+            repository.getLocationByLongLat(
+                longitude = long,
+                latitude = lat,
+                onSuccess = {
+                    lastCallLocationResponse.value = it
+                },
+                onFailed = {
+                    Log.e("ERROR", it.toString())
+                }
+            )
+        }
     }
 
     init {
@@ -84,6 +121,27 @@ class HomeViewModel @Inject constructor(
             }
         )
 
-        repository.listenEmCallSnapshot()
+        repository.listenEmCallSnapshot(
+            onListened = {
+                lastCall.value = it.last()
+            },
+            onFailed = {
+                Log.e("ERROR", it.toString())
+            }
+        )
+
+        repository.getAllCallStatus(
+            onSuccess = {
+                it.forEach { item ->
+                    callStatusMap.put(
+                        key = item.em_call_status_id,
+                        value = item.word
+                    )
+                }
+            },
+            onFailed = {
+                Log.e("ERROR", it.toString())
+            }
+        )
     }
 }

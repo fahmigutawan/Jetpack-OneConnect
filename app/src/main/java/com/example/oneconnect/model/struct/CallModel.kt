@@ -11,7 +11,7 @@ data class CallModel(
     val user_lat:String? = "",
     val transport_long:String? = "",
     val transport_lat:String? = "",
-    val created_at:Map<String, String>,
+    val created_at:Map<String, String>? = null,
     val user_phone_number:String? = "",
     val em_call_status_id:String? = ""
 )
