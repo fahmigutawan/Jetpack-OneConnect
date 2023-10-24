@@ -1,0 +1,73 @@
+package com.example.oneconnect.presentation.call_detail
+
+import android.util.Log
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
+import com.example.oneconnect.data.Repository
+import com.example.oneconnect.model.struct.CallModel
+import com.example.oneconnect.model.struct.EmergencyProviderModel
+import com.example.oneconnect.model.struct.EmergencyTypeModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+
+@HiltViewModel
+class CallDetailViewModel @Inject constructor(
+    private val repository: Repository
+) :ViewModel(){
+    val call = mutableStateOf<CallModel?>(null)
+    val emProvider = mutableStateOf<EmergencyProviderModel?>(null)
+    val statusMap = mutableMapOf<String, String>()
+    val emProviderTypeMap = mutableMapOf<String, String>()
+
+    fun getCallInfoFromId(
+        id:String
+    ){
+        repository.listenEmCallSnapshotById(
+            emCallId = id,
+            onListened = {
+                call.value = it
+            },
+            onFailed = {
+                Log.e("ERROR", it.toString())
+            }
+        )
+    }
+
+    fun getEmProvider(
+        emPvdId:String
+    ){
+        repository.getEmergencyProviderById(
+            emPvdId = emPvdId,
+            onSuccess = {
+                emProvider.value = it
+            },
+            onFailed = {
+                Log.e("ERROR", it.toString())
+            }
+        )
+    }
+
+    init {
+        repository.getAllCallStatus(
+            onSuccess = {
+                it.forEach { item ->
+                    statusMap[item.em_call_status_id] = item.word
+                }
+            },
+            onFailed = {
+                Log.e("ERROR", it.toString())
+            }
+        )
+
+        repository.getAllEmergencyType(
+            onSuccess = {
+                it.forEach {
+                    emProviderTypeMap[it.emTypeId ?: "-"] = it.word ?: "-"
+                }
+            },
+            onFailed = {
+                Log.e("ERROR", it.toString())
+            }
+        )
+    }
+}

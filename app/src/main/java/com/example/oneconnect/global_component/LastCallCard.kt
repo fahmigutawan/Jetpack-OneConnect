@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun LastCallCard(
+    onLihatDetailClick:() -> Unit,
     name: String,
     location: String,
     status: String
@@ -65,7 +66,7 @@ fun LastCallCard(
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
-                Button(onClick = { /*TODO*/ }) {
+                Button(onClick = onLihatDetailClick) {
                     Text(text = "Lihat Detail", color = MaterialTheme.colorScheme.onPrimary)
                 }
             }

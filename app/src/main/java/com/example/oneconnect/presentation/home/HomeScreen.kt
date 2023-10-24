@@ -46,13 +46,6 @@ import kotlin.system.exitProcess
 fun HomeScreen(
     navController: NavController
 ) {
-    val dummyLastCall = HomeLastCallDomain(
-        id = "123",
-        name = "RS Permata Indah",
-        location = "Dinoyo, Malang",
-        status = "Menunggu Konfirmasi"
-    )
-
     val viewModel = hiltViewModel<HomeViewModel>()
     val clipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
@@ -62,20 +55,20 @@ fun HomeScreen(
     }
 
     LaunchedEffect(key1 = viewModel.favoritePhoneProviders.toList()) {
-        if(viewModel.favoritePhoneProviders.isNotEmpty()){
+        if (viewModel.favoritePhoneProviders.isNotEmpty()) {
             viewModel.getMultipleTransportCount(
                 viewModel.favoritePhoneProviders.toList().map { it.em_pvd_id }
             )
         }
     }
 
-    LaunchedEffect(key1 = viewModel.lastCall.value){
+    LaunchedEffect(key1 = viewModel.lastCall.value) {
         viewModel.lastCall.value?.let {
             viewModel.getEmergencyProviderById(it.em_pvd_id ?: "")
         }
     }
 
-    LaunchedEffect(key1 = viewModel.lastCallEmProvider.value){
+    LaunchedEffect(key1 = viewModel.lastCallEmProvider.value) {
         viewModel.lastCallEmProvider.value?.let {
             viewModel.getLocationFromLongLat(
                 long = it.longitude?.toDouble() ?: .0,
@@ -112,9 +105,16 @@ fun HomeScreen(
 
             item {
                 LastCallCard(
+                    onLihatDetailClick = {
+                        navController.navigate(
+                            route = "${NavRoutes.CALL_DETAIL.name}/${viewModel.lastCall.value?.em_call_id ?: ""}"
+                        )
+                    },
                     name = viewModel.lastCallEmProvider.value?.name ?: "",
-                    location = viewModel.lastCallLocationResponse.value?.features?.get(0)?.properties?.place_formatted ?: "",
-                    status = viewModel.callStatusMap[viewModel.lastCall.value?.em_call_status_id ?: ""] ?: "..."
+                    location = viewModel.lastCallLocationResponse.value?.features?.get(0)?.properties?.place_formatted
+                        ?: "",
+                    status = viewModel.callStatusMap[viewModel.lastCall.value?.em_call_status_id
+                        ?: ""] ?: "..."
                 )
             }
         }
@@ -193,7 +193,8 @@ fun HomeScreen(
                     }
                     SnackbarHandler.showSnackbar("Berhasil dihapus dari favorit")
                 },
-                availableTransportCount = (viewModel.availableTransportCountMaps.value[item.em_pvd_id] ?: 0)
+                availableTransportCount = (viewModel.availableTransportCountMaps.value[item.em_pvd_id]
+                    ?: 0)
             )
         }
 

@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.oneconnect.MainViewModel
+import com.example.oneconnect.presentation.call_detail.CallDetailScreen
 import com.example.oneconnect.presentation.home.HomeScreen
 import com.example.oneconnect.presentation.login.LoginScreen
 import com.example.oneconnect.presentation.map.MapScreen
@@ -79,16 +80,32 @@ fun AppNavHost(
         composable(
             route = "${NavRoutes.MAP.name}/{em_type_id}",
             arguments = listOf(
-                navArgument("em_type_id"){
+                navArgument("em_type_id") {
                     type = NavType.StringType
                 }
             )
-        ){
+        ) {
             val emTypeId = it.arguments?.getString("em_type_id") ?: ""
 
             MapScreen(
                 navController = navController,
                 emTypeId = emTypeId
+            )
+        }
+
+        composable(
+            route = "${NavRoutes.CALL_DETAIL.name}/{em_call_id}",
+            arguments = listOf(
+                navArgument("em_call_id") {
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            val emCallId = it.arguments?.getString("em_call_id") ?: ""
+
+            CallDetailScreen(
+                navController = navController,
+                emCallId = emCallId
             )
         }
     }

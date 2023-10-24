@@ -159,6 +159,32 @@ class Repository @Inject constructor(
             }
     }
 
+    fun getEmergencyTypeById(
+        emTypeId: String,
+        onSuccess: (EmergencyTypeModel) -> Unit,
+        onFailed: (Exception) -> Unit
+    ) {
+        firestore
+            .collection("em_type")
+            .document(emTypeId)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    onFailed(error)
+                    return@addSnapshotListener
+                }
+
+                value?.let { doc ->
+                    onSuccess(
+                        EmergencyTypeModel(
+                            emTypeId = doc["em_type_id"] as String,
+                            word = doc["word"] as String
+                        )
+                    )
+                    return@addSnapshotListener
+                }
+            }
+    }
+
     fun getAllEmergencyProvider(
         onSuccess: (List<EmergencyProviderModel>) -> Unit,
         onFailed: (Exception) -> Unit
@@ -470,10 +496,45 @@ class Repository @Inject constructor(
             )
     }
 
+    fun listenEmCallSnapshotById(
+        emCallId: String,
+        onListened: (CallModel) -> Unit,
+        onFailed: (Exception) -> Unit
+    ) {
+        realtimeDb
+            .reference
+            .child("em_call")
+            .child(emCallId)
+            .addValueEventListener(
+                object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        onListened(
+                            CallModel(
+                                em_call_id = snapshot.child("em_call_id").value as String,
+                                uid = snapshot.child("uid").value as String,
+                                em_transport_id = snapshot.child("em_transport_id").value as String,
+                                em_pvd_id = snapshot.child("em_pvd_id").value as String,
+                                user_long = snapshot.child("user_long").value as String,
+                                user_lat = snapshot.child("user_lat").value as String,
+                                transport_long = snapshot.child("transport_long").value as String,
+                                transport_lat = snapshot.child("transport_lat").value as String,
+                                user_phone_number = snapshot.child("user_phone_number").value as String,
+                                em_call_status_id = snapshot.child("em_call_status_id").value as String,
+                            )
+                        )
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        onFailed(error.toException())
+                    }
+                }
+            )
+    }
+
     fun getAllCallStatus(
         onSuccess: (List<CallStatusModel>) -> Unit,
         onFailed: (Exception) -> Unit
-    ){
+    ) {
         firestore
             .collection("em_call_status")
             .addSnapshotListener { value, error ->

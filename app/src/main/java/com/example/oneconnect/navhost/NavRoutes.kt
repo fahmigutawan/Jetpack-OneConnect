@@ -7,5 +7,6 @@ enum class NavRoutes {
     PROFIL,
     LOGIN,
     OTP,
-    USER_DATA_INPUT
+    USER_DATA_INPUT,
+    CALL_DETAIL
 }
