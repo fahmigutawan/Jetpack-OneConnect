@@ -52,10 +52,6 @@ fun HomeScreen(
         location = "Dinoyo, Malang",
         status = "Menunggu Konfirmasi"
     )
-    val dummyProfile = HomeUserDomain(
-        name = "Fahmi Noordin Rumagutawan",
-        address = "Jl. Kalpataru"
-    )
 
     val viewModel = hiltViewModel<HomeViewModel>()
     val clipboardManager = LocalClipboardManager.current
@@ -89,8 +85,8 @@ fun HomeScreen(
         item {
             HomeProfileSection(
                 modifier = Modifier.padding(top = 16.dp),
-                name = dummyProfile.name,
-                location = dummyProfile.address
+                name = viewModel.userInfo.value?.name ?: "...",
+                location = "Jawa Timur, Indonesia"
             )
         }
         item {

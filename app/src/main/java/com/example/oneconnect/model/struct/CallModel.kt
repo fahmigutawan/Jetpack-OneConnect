@@ -1,5 +1,7 @@
 package com.example.oneconnect.model.struct
 
+import com.google.firebase.Timestamp
+
 data class CallModel(
     val em_call_id:String? = "",
     val uid:String? = "",

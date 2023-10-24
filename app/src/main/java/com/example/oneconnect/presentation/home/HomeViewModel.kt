@@ -11,6 +11,7 @@ import com.example.oneconnect.model.domain.general.PhoneNumberDomain
 import com.example.oneconnect.model.domain.home.HomeEmergencyTypeDomain
 import com.example.oneconnect.model.domain.home.HomeFavoriteNumberDomain
 import com.example.oneconnect.model.entity.FavoriteItemEntity
+import com.example.oneconnect.model.struct.UserModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,6 +29,7 @@ class HomeViewModel @Inject constructor(
     val emTypes = mutableStateListOf<HomeEmergencyTypeDomain>()
     val favoritePhoneProviders = mutableStateListOf<FavoriteItemEntity>()
     val availableTransportCountMaps = mutableStateOf(mapOf<String, Int>())
+    val userInfo = mutableStateOf<UserModel?>(null)
 
     fun deleteFavoriteItem(item: FavoriteItemEntity) = repository.deleteFavoriteItem(item)
 
@@ -72,5 +74,16 @@ class HomeViewModel @Inject constructor(
                 Log.e("ERROR", it.toString())
             }
         )
+
+        repository.getUserInfo(
+            onSuccess = {
+                userInfo.value = it
+            },
+            onFailed = {
+                Log.e("ERROR", it.toString())
+            }
+        )
+
+        repository.listenEmCallSnapshot()
     }
 }

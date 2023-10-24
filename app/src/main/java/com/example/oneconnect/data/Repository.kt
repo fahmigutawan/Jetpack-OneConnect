@@ -1,6 +1,7 @@
 package com.example.oneconnect.data
 
 import android.content.Context
+import android.util.Log
 import com.example.oneconnect.data.room.RoomDb
 import com.example.oneconnect.helper.UserDataInputStatus
 import com.example.oneconnect.model.entity.FavoriteItemEntity
@@ -15,8 +16,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ServerValue
+import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.ktx.getValue
 import com.google.firebase.firestore.FirebaseFirestore
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -329,6 +334,35 @@ class Repository @Inject constructor(
             }
     }
 
+    fun getUserInfo(
+        uid:String = auth.currentUser?.uid ?: "",
+        onSuccess:(UserModel) -> Unit,
+        onFailed: (Exception) -> Unit
+    ){
+        firestore
+            .collection("user")
+            .document(uid)
+            .addSnapshotListener { value, error ->
+                if(error != null){
+                    onFailed(error)
+                    return@addSnapshotListener
+                }
+
+                value?.let {
+                    onSuccess(
+                        UserModel(
+                            uid = it["uid"] as String,
+                            name = it["name"] as String,
+                            nik = it["nik"] as String,
+                            phone_number = it["phone_number"] as String,
+                            admin = it["admin"] as Boolean,
+                            created_at = it["created_at"] as Timestamp
+                        )
+                    )
+                }
+            }
+    }
+
     fun makeCallObjectInRealtimeDb(
         emPvdId: String,
         userLong: Double,
@@ -362,6 +396,31 @@ class Repository @Inject constructor(
             .child("em_call")
             .child(em_call_id)
             .setValue(body)
+    }
+
+    fun listenEmCallSnapshot(
+        uid:String = auth.currentUser?.uid ?: "",
+        onSuccess:() -> Unit,
+        onFailed: (Exception) -> Unit
+    ){
+        realtimeDb
+            .reference
+            .child("em_call")
+            .orderByChild("uid")
+            .equalTo(uid)
+            .addValueEventListener(
+                object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val sorted = snapshot.children.sortedBy {
+                            it.child("created_at").value as Long
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+
+                    }
+                }
+            )
     }
 
     fun logout() {

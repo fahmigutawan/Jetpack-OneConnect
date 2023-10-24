@@ -44,9 +44,9 @@ fun ProfileScreen(
     val viewModel = hiltViewModel<ProfileViewModel>()
 
     BackHandler {
-        if(mainViewModel.backClicked.value){
+        if (mainViewModel.backClicked.value) {
             exitProcess(0)
-        }else{
+        } else {
             SnackbarHandler.showSnackbar("Klik kembali sekali lagi untuk keluar dari OneConnect")
             mainViewModel.backClicked.value = true
         }
@@ -82,7 +82,10 @@ fun ProfileScreen(
                     contentDescription = ""
                 )
 
-                Text(text = "Fahmi", style = MaterialTheme.typography.headlineSmall)
+                Text(
+                    text = viewModel.userInfo.value?.name ?: "...",
+                    style = MaterialTheme.typography.headlineSmall
+                )
 
                 Button(onClick = { /*TODO*/ }) {
                     Row(
@@ -95,13 +98,16 @@ fun ProfileScreen(
                 }
             }
 
-            ProfileInformationCard(phoneNumber = "08155393193", nik = "3518123312333213")
+            ProfileInformationCard(
+                phoneNumber = viewModel.userInfo.value?.phone_number ?: "...",
+                nik = viewModel.userInfo.value?.nik ?: "..."
+            )
 
             ProfileButtonsSection(
                 onKeluarClicked = {
                     viewModel.logout()
-                    navController.navigate(NavRoutes.LOGIN.name){
-                        popUpTo(navController.graph.id){
+                    navController.navigate(NavRoutes.LOGIN.name) {
+                        popUpTo(navController.graph.id) {
                             inclusive = true
                         }
                     }
