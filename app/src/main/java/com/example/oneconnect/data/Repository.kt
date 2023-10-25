@@ -484,6 +484,7 @@ class Repository @Inject constructor(
                                     transport_lat = it.child("transport_lat").value as String,
                                     user_phone_number = it.child("user_phone_number").value as String,
                                     em_call_status_id = it.child("em_call_status_id").value as String,
+                                    created_at = mapOf("value" to (it.child("created_at").value as Long).toString())
                                 )
                             }
                         )

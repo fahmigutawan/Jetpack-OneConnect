@@ -35,6 +35,7 @@ import com.example.oneconnect.R
 fun HomeProfileSection(
     modifier: Modifier = Modifier,
     name: String,
+    onRiwayatClick:() -> Unit,
     location: String
 ) {
     Row(
@@ -68,7 +69,7 @@ fun HomeProfileSection(
                 Text(text = location, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             ElevatedButton(
-                onClick = { /*TODO*/ },
+                onClick = onRiwayatClick,
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 8.dp
                 ),

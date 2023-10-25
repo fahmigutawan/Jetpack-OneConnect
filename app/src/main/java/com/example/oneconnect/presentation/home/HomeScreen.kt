@@ -2,8 +2,6 @@ package com.example.oneconnect.presentation.home
 
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
-import android.widget.Space
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
@@ -16,14 +14,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -34,10 +30,6 @@ import com.example.oneconnect.global_component.LastCallCard
 import com.example.oneconnect.global_component.NonLazyVerticalGrid
 import com.example.oneconnect.helper.SnackbarHandler
 import com.example.oneconnect.mainViewModel
-import com.example.oneconnect.model.domain.general.PhoneNumberDomain
-import com.example.oneconnect.model.domain.home.HomeFavoriteNumberDomain
-import com.example.oneconnect.model.domain.home.HomeLastCallDomain
-import com.example.oneconnect.model.domain.home.HomeUserDomain
 import com.example.oneconnect.navhost.NavRoutes
 import com.example.oneconnect.presentation.home.component.HomeProfileSection
 import kotlin.system.exitProcess
@@ -94,10 +86,14 @@ fun HomeScreen(
             HomeProfileSection(
                 modifier = Modifier.padding(top = 16.dp),
                 name = viewModel.userInfo.value?.name ?: "...",
-                location = "Jawa Timur, Indonesia"
+                location = "Jawa Timur, Indonesia",
+                onRiwayatClick = {
+                    navController.navigate(
+                        route = NavRoutes.HISTORY.name
+                    )
+                }
             )
         }
-
         viewModel.lastCall.value?.let {
             item {
                 Text(text = "Panggilan Terakhir", style = MaterialTheme.typography.headlineSmall)
@@ -111,7 +107,7 @@ fun HomeScreen(
                         )
                     },
                     name = viewModel.lastCallEmProvider.value?.name ?: "",
-                    location = viewModel.lastCallLocationResponse.value?.features?.get(0)?.properties?.place_formatted
+                    locationOrDate = viewModel.lastCallLocationResponse.value?.features?.get(0)?.properties?.place_formatted
                         ?: "",
                     status = viewModel.callStatusMap[viewModel.lastCall.value?.em_call_status_id
                         ?: ""] ?: "..."
@@ -158,7 +154,6 @@ fun HomeScreen(
                 )
             }
         }
-
         items(viewModel.favoritePhoneProviders) { item ->
             ContactInfoCard(
                 location = item.location ?: "",
@@ -197,7 +192,6 @@ fun HomeScreen(
                     ?: 0)
             )
         }
-
         item {
             Spacer(modifier = Modifier.height(16.dp))
         }

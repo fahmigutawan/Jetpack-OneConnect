@@ -77,9 +77,43 @@ fun CallDetailScreen(
     LaunchedEffect(key1 = true) {
         viewModel.getCallInfoFromId(
             id = emCallId,
-            onListened = {
+            onListened = {call ->
                 if (viewModel.call.value == null) {
-                    viewModel.call.value = it
+                    viewModel.call.value = call
+                }
+
+                if(call.em_call_status_id == "rBiU5gy2mwSus2n96cMu"){
+                    mapView.value?.let {
+                        val viewAnnotationManager = it.viewAnnotationManager
+                        viewAnnotationManager.removeAllViewAnnotations()
+
+                        val view = viewAnnotationManager.addViewAnnotation(
+                            resId = R.layout.emergency_provider_item,
+                            options = viewAnnotationOptions {
+                                geometry(
+                                    Point.fromLngLat(
+                                        call.transport_long?.toDouble() ?: .0,
+                                        call.transport_lat?.toDouble() ?: .0
+                                    )
+                                )
+                            }
+                        )
+                        val compose = view.findViewById<ComposeView>(R.id.compose_item)
+                        compose.setContent {
+                            Icon(
+                                modifier = Modifier.size(24.dp),
+                                painter = rememberAsyncImagePainter(
+                                    model = EmergencyTypeIcon.getIconId(
+                                        viewModel.emProvider.value?.em_type ?: ""
+                                    ) ?: R.drawable.ic_circle
+                                ),
+                                contentDescription = "",
+                                tint = EmergencyTypeIcon.getContentColor(
+                                    viewModel.emProvider.value?.em_type ?: ""
+                                )
+                            )
+                        }
+                    }
                 }
             },
             onFailed = {

@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.oneconnect.MainViewModel
 import com.example.oneconnect.presentation.call_detail.CallDetailScreen
+import com.example.oneconnect.presentation.history.HistoryScreen
 import com.example.oneconnect.presentation.home.HomeScreen
 import com.example.oneconnect.presentation.login.LoginScreen
 import com.example.oneconnect.presentation.map.MapScreen
@@ -107,6 +108,12 @@ fun AppNavHost(
                 navController = navController,
                 emCallId = emCallId
             )
+        }
+
+        composable(
+            route = NavRoutes.HISTORY.name
+        ){
+            HistoryScreen(navController = navController)
         }
     }
 }

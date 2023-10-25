@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 fun LastCallCard(
     onLihatDetailClick:() -> Unit,
     name: String,
-    location: String,
+    locationOrDate: String,
     status: String
 ) {
     val scrWidth = LocalConfiguration.current.screenWidthDp
@@ -48,7 +48,7 @@ fun LastCallCard(
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = location,
+                    text = locationOrDate,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     style = MaterialTheme.typography.titleSmall,
