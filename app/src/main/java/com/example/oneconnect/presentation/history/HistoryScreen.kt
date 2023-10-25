@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.oneconnect.global_component.LastCallCard
+import com.example.oneconnect.navhost.NavRoutes
 import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,7 +64,11 @@ fun HistoryScreen(
                 val dateString: String = formatter.format(Date(second))
 
                 LastCallCard(
-                    onLihatDetailClick = { /*TODO*/ },
+                    onLihatDetailClick = {
+                        navController.navigate(
+                            route = "${NavRoutes.CALL_DETAIL.name}/${item.em_call_id ?: ""}"
+                        )
+                    },
                     name = viewModel.providerNameMap[item.em_pvd_id ?: ""]?.name ?: "...",
                     locationOrDate = dateString,
                     status = viewModel.statusMap[item.em_call_status_id ?: ""] ?: "..."
