@@ -14,22 +14,4 @@ class MainViewModel : ViewModel() {
     val currentRoute = mutableStateOf(NavRoutes.SPLASH.name)
     val showBottomBar = mutableStateOf(false)
     val backClicked = mutableStateOf(false)
-
-    init {
-        val firestore = FirebaseFirestore.getInstance()
-        val auth = FirebaseAuth.getInstance()
-        val fcm = FirebaseMessaging.getInstance()
-
-        fcm.token.addOnSuccessListener { token ->
-            firestore
-                .collection("fcm_token")
-                .document(auth.currentUser?.uid ?: "")
-                .set(
-                    FcmTokenStruct(
-                        uid = auth.currentUser?.uid ?: "",
-                        token = token
-                    )
-                )
-        }
-    }
 }

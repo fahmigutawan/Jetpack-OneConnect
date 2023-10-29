@@ -32,22 +32,26 @@ fun SplashScreen(navController: NavController) {
             }
         },
         onUserDataInputStatusCheck = { phoneNumber, status ->
-            when(status){
-                UserDataInputStatus.INPUTTED -> {
-                    navController.navigate(NavRoutes.BERANDA.name) {
-                        popUpTo(navController.graph.id) {
-                            inclusive = true
+            viewmodel.handleFcmToken(
+                onSuccess = {
+                    when(status){
+                        UserDataInputStatus.INPUTTED -> {
+                            navController.navigate(NavRoutes.BERANDA.name) {
+                                popUpTo(navController.graph.id) {
+                                    inclusive = true
+                                }
+                            }
+                        }
+                        UserDataInputStatus.HAVE_NOT_INPUTTED -> {
+                            navController.navigate("${NavRoutes.USER_DATA_INPUT.name}/$phoneNumber") {
+                                popUpTo(navController.graph.id) {
+                                    inclusive = true
+                                }
+                            }
                         }
                     }
                 }
-                UserDataInputStatus.HAVE_NOT_INPUTTED -> {
-                    navController.navigate("${NavRoutes.USER_DATA_INPUT.name}/$phoneNumber") {
-                        popUpTo(navController.graph.id) {
-                            inclusive = true
-                        }
-                    }
-                }
-            }
+            )
         }
     )
 
