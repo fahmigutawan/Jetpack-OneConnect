@@ -11,16 +11,17 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.oneconnect.R
+import com.example.oneconnect.model.struct.FcmTokenStruct
 import com.google.android.gms.cloudmessaging.CloudMessage
 import com.google.android.gms.cloudmessaging.CloudMessagingReceiver
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
 class FirebaseFCMService : FirebaseMessagingService(){
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
-
-        Log.e("MESSAGE", "RECEIVED")
 
         var builder = NotificationCompat.Builder(this, "CHANNEL ID")
             .setSmallIcon(R.drawable.splash_logo)
@@ -53,5 +54,16 @@ class FirebaseFCMService : FirebaseMessagingService(){
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        val firestore = FirebaseFirestore.getInstance()
+        val auth = FirebaseAuth.getInstance()
+        firestore
+            .collection("fcm_token")
+            .document(auth.currentUser?.uid ?: "")
+            .set(
+                FcmTokenStruct(
+                    uid = auth.currentUser?.uid ?: "",
+                    token = token
+                )
+            )
     }
 }
