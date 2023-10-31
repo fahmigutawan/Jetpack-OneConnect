@@ -277,7 +277,8 @@ fun CallDetailScreen(
                     }
 
                     Column(
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.End
                     ) {
                         Text(
                             text = viewModel.statusMap[viewModel.call.value?.em_call_status_id

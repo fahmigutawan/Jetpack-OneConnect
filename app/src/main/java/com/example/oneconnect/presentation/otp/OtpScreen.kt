@@ -56,23 +56,26 @@ fun OtpScreen(
             viewModel.signInWithCredential(
                 credential = p0,
                 onSuccess = {
-                    when (it) {
-                        UserDataInputStatus.INPUTTED -> {
-                            navController.navigate(NavRoutes.BERANDA.name) {
-                                popUpTo(navController.graph.id) {
-                                    inclusive = true
+                    viewModel.handleFcmToken {
+                        when (it) {
+                            UserDataInputStatus.INPUTTED -> {
+                                navController.navigate(NavRoutes.BERANDA.name) {
+                                    popUpTo(navController.graph.id) {
+                                        inclusive = true
+                                    }
                                 }
                             }
-                        }
 
-                        UserDataInputStatus.HAVE_NOT_INPUTTED -> {
-                            navController.navigate("${NavRoutes.USER_DATA_INPUT.name}/$phoneNumber") {
-                                popUpTo(navController.graph.id) {
-                                    inclusive = true
+                            UserDataInputStatus.HAVE_NOT_INPUTTED -> {
+                                navController.navigate("${NavRoutes.USER_DATA_INPUT.name}/$phoneNumber") {
+                                    popUpTo(navController.graph.id) {
+                                        inclusive = true
+                                    }
                                 }
                             }
                         }
                     }
+
                     LoadingHandler.dismiss()
                 },
                 onFailed = {

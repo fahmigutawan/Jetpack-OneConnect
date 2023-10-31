@@ -123,7 +123,9 @@ class HomeViewModel @Inject constructor(
 
         repository.listenEmCallSnapshot(
             onListened = {
-                lastCall.value = it.last()
+                if(it.size > 0){
+                    lastCall.value = it.last()
+                }
             },
             onFailed = {
                 Log.e("ERROR", it.toString())
@@ -140,7 +142,10 @@ class HomeViewModel @Inject constructor(
                 }
             },
             onFailed = {
-                Log.e("ERROR", it.toString())
+                Log.e(
+                    "ERROR",
+                    it.toString()
+                )
             }
         )
     }

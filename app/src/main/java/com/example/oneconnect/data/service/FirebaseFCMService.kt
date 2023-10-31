@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.core.app.ActivityCompat
@@ -25,8 +26,9 @@ class FirebaseFCMService : FirebaseMessagingService(){
 
         var builder = NotificationCompat.Builder(this, "CHANNEL ID")
             .setSmallIcon(R.drawable.splash_logo)
-            .setContentTitle("textTitle")
-            .setContentText("textContent")
+            .setContentTitle(message.notification?.title)
+            .setContentText(message.notification?.body)
+            .setSound(Uri.parse(message.notification?.sound))
             .setPriority(NotificationCompat.PRIORITY_MAX)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
