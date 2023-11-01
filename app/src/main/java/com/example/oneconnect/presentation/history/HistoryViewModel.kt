@@ -21,7 +21,7 @@ class HistoryViewModel @Inject constructor(
         repository.listenEmCallSnapshot(
             onListened = {
                 listCall.clear()
-                listCall.addAll(it)
+                listCall.addAll(it.reversed())
 
                 it.forEach { model ->
                     repository.getEmergencyProviderById(

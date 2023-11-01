@@ -425,6 +425,7 @@ fun MapScreen(
                             }.toJson()
                         )
                     }
+
                     it.getMapboxMap().addOnMoveListener(onMoveListener)
                 }
             }

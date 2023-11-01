@@ -18,6 +18,9 @@ class CallDetailViewModel @Inject constructor(
     val emProvider = mutableStateOf<EmergencyProviderModel?>(null)
     val statusMap = mutableMapOf<String, String>()
     val emProviderTypeMap = mutableMapOf<String, String>()
+    val long = mutableStateOf(.0)
+    val lat = mutableStateOf(.0)
+    val realtimeStatus = mutableStateOf("...")
 
     fun getCallInfoFromId(
         id:String,

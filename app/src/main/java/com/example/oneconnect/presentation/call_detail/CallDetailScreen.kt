@@ -51,6 +51,7 @@ import com.example.oneconnect.databinding.MapboxViewBinding
 import com.example.oneconnect.global_component.CategoryCardType
 import com.example.oneconnect.global_component.EmergencyTypeCard
 import com.example.oneconnect.global_component.NonLazyVerticalGrid
+import com.example.oneconnect.helper.CallStatus
 import com.example.oneconnect.helper.EmergencyTypeIcon
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -77,43 +78,20 @@ fun CallDetailScreen(
     LaunchedEffect(key1 = true) {
         viewModel.getCallInfoFromId(
             id = emCallId,
-            onListened = {call ->
+            onListened = { call ->
                 if (viewModel.call.value == null) {
                     viewModel.call.value = call
                 }
 
-                if(call.em_call_status_id == "rBiU5gy2mwSus2n96cMu"){
-                    mapView.value?.let {
-                        val viewAnnotationManager = it.viewAnnotationManager
-                        viewAnnotationManager.removeAllViewAnnotations()
+                viewModel.realtimeStatus.value = viewModel.statusMap[call.em_call_status_id
+                    ?: ""] ?: "..."
 
-                        val view = viewAnnotationManager.addViewAnnotation(
-                            resId = R.layout.emergency_provider_item,
-                            options = viewAnnotationOptions {
-                                geometry(
-                                    Point.fromLngLat(
-                                        call.transport_long?.toDouble() ?: .0,
-                                        call.transport_lat?.toDouble() ?: .0
-                                    )
-                                )
-                            }
-                        )
-                        val compose = view.findViewById<ComposeView>(R.id.compose_item)
-                        compose.setContent {
-                            Icon(
-                                modifier = Modifier.size(24.dp),
-                                painter = rememberAsyncImagePainter(
-                                    model = EmergencyTypeIcon.getIconId(
-                                        viewModel.emProvider.value?.em_type ?: ""
-                                    ) ?: R.drawable.ic_circle
-                                ),
-                                contentDescription = "",
-                                tint = EmergencyTypeIcon.getContentColor(
-                                    viewModel.emProvider.value?.em_type ?: ""
-                                )
-                            )
-                        }
-                    }
+                call.transport_lat?.let {
+                    viewModel.lat.value = it.toDouble()
+                }
+
+                call.transport_long?.let {
+                    viewModel.long.value = it.toDouble()
                 }
             },
             onFailed = {
@@ -122,58 +100,65 @@ fun CallDetailScreen(
         )
     }
 
-    LaunchedEffect(key1 = viewModel.emProvider.value){
+    LaunchedEffect(key1 = viewModel.emProvider.value) {
         viewModel.emProvider.value?.let { provider ->
-            mapView.value?.let {
-                val viewAnnotationManager = it.viewAnnotationManager
-                viewAnnotationManager.removeAllViewAnnotations()
-                val view = viewAnnotationManager.addViewAnnotation(
-                    resId = R.layout.emergency_provider_item,
-                    options = viewAnnotationOptions {
-                        geometry(
-                            Point.fromLngLat(
-                                provider
-                                    .longitude
-                                    ?.toDouble() ?: .0,
-                                provider
-                                    .latitude
-                                    ?.toDouble() ?: .0
-                            )
-                        )
-                    }
-                )
-                val compose = view.findViewById<ComposeView>(R.id.compose_item)
-                compose.setContent {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .border(
-                                border = BorderStroke(
-                                    width = 2.dp,
-                                    color = Color.White
-                                ),
-                                shape = CircleShape
-                            )
-                            .background(
-                                EmergencyTypeIcon.getContainerColor(
-                                    provider.em_type ?: ""
+            viewModel.call.value?.let { call ->
+                mapView.value?.let { map ->
+                    val viewAnnotationManager = map.viewAnnotationManager
+                    viewAnnotationManager.removeAllViewAnnotations()
+
+                    if (call.em_call_status_id == CallStatus.DIPROSES) {
+                        viewAnnotationManager.removeAllViewAnnotations()
+                    } else {
+                        val view = viewAnnotationManager.addViewAnnotation(
+                            resId = R.layout.emergency_provider_item,
+                            options = viewAnnotationOptions {
+                                geometry(
+                                    Point.fromLngLat(
+                                        provider
+                                            .longitude
+                                            ?.toDouble() ?: .0,
+                                        provider
+                                            .latitude
+                                            ?.toDouble() ?: .0
+                                    )
                                 )
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(24.dp),
-                            painter = rememberAsyncImagePainter(
-                                model = EmergencyTypeIcon.getIconId(
-                                    provider.em_type ?: ""
-                                ) ?: R.drawable.ic_circle
-                            ),
-                            contentDescription = "",
-                            tint = EmergencyTypeIcon.getContentColor(
-                                provider.em_type ?: ""
-                            )
+                            }
                         )
+                        val compose = view.findViewById<ComposeView>(R.id.compose_item)
+                        compose.setContent {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .border(
+                                        border = BorderStroke(
+                                            width = 2.dp,
+                                            color = Color.White
+                                        ),
+                                        shape = CircleShape
+                                    )
+                                    .background(
+                                        EmergencyTypeIcon.getContainerColor(
+                                            provider.em_type ?: ""
+                                        )
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    painter = rememberAsyncImagePainter(
+                                        model = EmergencyTypeIcon.getIconId(
+                                            provider.em_type ?: ""
+                                        ) ?: R.drawable.ic_circle
+                                    ),
+                                    contentDescription = "",
+                                    tint = EmergencyTypeIcon.getContentColor(
+                                        provider.em_type ?: ""
+                                    )
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -214,6 +199,58 @@ fun CallDetailScreen(
                 circleAnnotationManager.deleteAll()
                 circleAnnotationManager.create(circleAnnotationOptions)
             }
+        }
+    }
+
+    LaunchedEffect(key1 = viewModel.long.value, key2 = viewModel.lat.value){
+        mapView.value?.let { map ->
+            val viewAnnotationManager = map.viewAnnotationManager
+            viewAnnotationManager.annotations
+
+            viewAnnotationManager.removeAllViewAnnotations()
+
+            val view = viewAnnotationManager.addViewAnnotation(
+                resId = R.layout.emergency_provider_item,
+                options = viewAnnotationOptions {
+                    geometry(
+                        Point.fromLngLat(
+                            viewModel.long.value,
+                            viewModel.lat.value
+                        )
+                    )
+                }
+            )
+            val compose = view.findViewById<ComposeView>(R.id.compose_item)
+            compose.setContent {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .border(
+                            border = BorderStroke(
+                                width = 2.dp,
+                                color = Color.White
+                            ),
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = rememberAsyncImagePainter(
+                            model = R.drawable.ic_circle
+                        ),
+                        contentDescription = "",
+                        tint = Color.Green
+                    )
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = mapView.value){
+        mapView.value?.let { map ->
+            //TODO
         }
     }
 
@@ -281,8 +318,7 @@ fun CallDetailScreen(
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(
-                            text = viewModel.statusMap[viewModel.call.value?.em_call_status_id
-                                ?: ""] ?: "...",
+                            text = viewModel.realtimeStatus.value,
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.secondary,
                             overflow = TextOverflow.Clip
