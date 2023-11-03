@@ -87,11 +87,11 @@ fun CallDetailScreen(
                     ?: ""] ?: "..."
 
                 call.transport_lat?.let {
-                    viewModel.lat.value = it.toDouble()
+                    viewModel.lat.value = it.toDoubleOrNull() ?: .0
                 }
 
                 call.transport_long?.let {
-                    viewModel.long.value = it.toDouble()
+                    viewModel.long.value = it.toDoubleOrNull() ?: .0
                 }
             },
             onFailed = {
@@ -204,45 +204,47 @@ fun CallDetailScreen(
 
     LaunchedEffect(key1 = viewModel.long.value, key2 = viewModel.lat.value){
         mapView.value?.let { map ->
-            val viewAnnotationManager = map.viewAnnotationManager
-            viewAnnotationManager.annotations
+            if(viewModel.long.value > 0 && viewModel.lat.value > 0){
+                val viewAnnotationManager = map.viewAnnotationManager
+                viewAnnotationManager.annotations
 
-            viewAnnotationManager.removeAllViewAnnotations()
+                viewAnnotationManager.removeAllViewAnnotations()
 
-            val view = viewAnnotationManager.addViewAnnotation(
-                resId = R.layout.emergency_provider_item,
-                options = viewAnnotationOptions {
-                    geometry(
-                        Point.fromLngLat(
-                            viewModel.long.value,
-                            viewModel.lat.value
+                val view = viewAnnotationManager.addViewAnnotation(
+                    resId = R.layout.emergency_provider_item,
+                    options = viewAnnotationOptions {
+                        geometry(
+                            Point.fromLngLat(
+                                viewModel.long.value,
+                                viewModel.lat.value
+                            )
                         )
-                    )
-                }
-            )
-            val compose = view.findViewById<ComposeView>(R.id.compose_item)
-            compose.setContent {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .border(
-                            border = BorderStroke(
-                                width = 2.dp,
-                                color = Color.White
+                    }
+                )
+                val compose = view.findViewById<ComposeView>(R.id.compose_item)
+                compose.setContent {
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .border(
+                                border = BorderStroke(
+                                    width = 2.dp,
+                                    color = Color.White
+                                ),
+                                shape = CircleShape
                             ),
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        painter = rememberAsyncImagePainter(
-                            model = R.drawable.ic_circle
-                        ),
-                        contentDescription = "",
-                        tint = Color.Green
-                    )
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = rememberAsyncImagePainter(
+                                model = R.drawable.ic_circle
+                            ),
+                            contentDescription = "",
+                            tint = Color.Green
+                        )
+                    }
                 }
             }
         }
